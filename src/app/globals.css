@@ -5,11 +5,17 @@
   --foreground: #171717;
 }
 
+@theme {
+  --color-darkgreen-500: #08340c;
+  --color-goldensilk-500: #c07c24;
+  --color-darkpurple-500: #593b92;
+  --color-bloodred-500: #4c0000;
+  --color-goldenrod-500: #ecc913;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +28,4 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
