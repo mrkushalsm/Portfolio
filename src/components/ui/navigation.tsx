@@ -51,8 +51,8 @@ export const Navigation = ( {windowWidth}: {windowWidth: number} ) => {
                 <Card title="Blogs" icon="/icons/blogs.svg" route="/blogs">
                     <CanvasRevealEffect
                         animationSpeed={5.1}
-                        containerClassName="bg-goldenrod-500"
-                        colors={[[183, 147, 6]]}
+                        containerClassName="bg-yellowlight-500"
+                        colors={[[239, 156, 7]]}
                     />
                 </Card>
             </div>
