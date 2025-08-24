@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import certificateData from "../../data/certificateData";
+import certificateData from "@/data/certificateData";
 import Image from "next/image";
 
 const Certificates = () => {
@@ -15,7 +15,9 @@ const Certificates = () => {
                         className="cursor-pointer bg-gray-100 p-2 rounded-lg shadow-md hover:shadow-lg"
                         onClick={() => setSelectedCert(cert)}
                     >
-                        <Image src={cert.image} alt={cert.title} className="w-full h-24 object-cover rounded-md" />
+                        <div className="relative w-full h-24 object-cover rounded-md">
+                            <Image src={cert.image} alt={cert.title} fill={true}  />
+                        </div>
                         <p className="text-center mt-2 font-semibold">{cert.title}</p>
                     </div>
                 ))}
@@ -26,7 +28,9 @@ const Certificates = () => {
                     <div className="bg-white p-6 rounded-lg shadow-lg max-w-md">
                         <h3 className="text-lg font-bold">{selectedCert.title}</h3>
                         <p className="text-gray-600">{selectedCert.organization}</p>
-                        <Image src={selectedCert.image} alt={selectedCert.title} className="w-full mt-2 rounded-md" />
+                        <div className="relative w-full mt-2 rounded-md">
+                            <Image src={selectedCert.image} alt={selectedCert.title} fill={true} />
+                        </div>
                         <p className="mt-2 text-sm text-gray-500">{selectedCert.date}</p>
                         <div className="flex justify-end mt-4">
                             <a href={selectedCert.link} target="_blank" className="text-blue-500 hover:underline">View Certificate</a>

@@ -88,8 +88,8 @@
 // export default Terminal;
 
 import React, { useState, useEffect, useRef } from "react";
-import { projects } from "../../data/projectsData";
-import { skillsData } from "../../data/skillsData";
+import { projects } from "@/data/projectsData";
+import { skillsData } from "@/data/skillsData";
 
 // ASCII Art for neofetch
 const ASCII_ART = `

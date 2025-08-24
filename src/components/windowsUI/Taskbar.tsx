@@ -1,9 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import windowsIcon from "@/../public/assets/taskbar/windows-icon.png";
-import volumeMute from "@/../public/assets/taskbar/volume-mute.png";
-import wifi from "@/../public/assets/taskbar/wifi.png";
-import battery from "@/../public/assets/taskbar/battery.png";
-import StartMenu from "./StartMenu";
+import React, { useState, useRef } from "react";
+import StartMenu from "@/components/windowsUI/StartMenu";
 import Image from "next/image";
 
 const Taskbar = ({ 
@@ -14,6 +10,14 @@ const Taskbar = ({
     windowVisibility = {},
     onToggleMinimize,
     onOpenApp
+}: {
+    openWindows: string[];
+    activeWindow: string | null;
+    setActiveWindow: (window: string) => void;
+    desktopIcons: { name: string; icon: string }[];
+    windowVisibility?: Record<string, boolean>;
+    onToggleMinimize?: (window: string) => void;
+    onOpenApp?: (appName: string) => void;
 }) => {
     const [showStartMenu, setShowStartMenu] = useState(false);
     const startButtonRef = useRef(null);
@@ -46,7 +50,7 @@ const Taskbar = ({
                             }`}
                             onClick={() => setShowStartMenu(!showStartMenu)}
                         >
-                            <Image src={windowsIcon} alt="Windows icon" className="w-6 h-6" />
+                            <Image src="/assets/taskbar/windows-icon.png" alt="Windows icon" width={24} height={24} />
                         </button>
                         {showStartMenu && (
                             <StartMenu
@@ -78,8 +82,9 @@ const Taskbar = ({
                                     {iconData && (
                                         <Image
                                             src={iconData.icon} 
-                                            alt={window} 
-                                            className="w-6 h-6" 
+                                            alt={window}
+                                            width={32}
+                                            height={32}
                                         />
                                     )}
                                 </button>
@@ -93,14 +98,14 @@ const Taskbar = ({
             <div className="flex items-center h-12 pr-2">
                 <div className="flex items-center space-x-1 h-full">
                     <div className="hidden sm:flex items-center space-x-1 h-full">
-                        <button className="p-2 rounded hover:bg-zinc-800 w-10 h-10 flex items-center justify-center">
-                            <Image src={wifi} alt="WiFi" className="w-5 h-5" />
+                        <button className="relative p-2 rounded hover:bg-zinc-800 w-10 h-10 flex items-center justify-center">
+                            <Image src="/assets/taskbar/wifi.png" alt="WiFi" width={20} height={20} />
                         </button>
                         <button className="p-2 rounded hover:bg-zinc-800 w-10 h-10 flex items-center justify-center">
-                            <Image src={battery} alt="Battery" className="w-5 h-5" />
+                            <Image src="/assets/taskbar/battery.png" alt="Battery" width={20} height={20} />
                         </button>
                         <button className="p-2 rounded hover:bg-zinc-800 w-10 h-10 flex items-center justify-center">
-                            <Image src={volumeMute} alt="Volume" className="w-5 h-5" />
+                            <Image src="/assets/taskbar/volume-mute.png" alt="Volume" width={20} height={20} />
                         </button>
                     </div>
                     <div className="h-8 w-px bg-zinc-600 mx-1"></div>

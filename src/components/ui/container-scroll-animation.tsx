@@ -78,18 +78,28 @@ export const Card = ({
     children: React.ReactNode;
 }) => {
     return (
-        <motion.div
-            style={{
-                rotateX: rotate,
-                scale,
-                boxShadow:
-                    "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
-            }}
-            className="max-w-8xl -mt-12 mx-auto h-[40rem] md:h-lvh  w-full border-4 border-[#6C6C6C] p-2 md:p-6 bg-[#222222] rounded-[10px] shadow-2xl"
-        >
-            <div className=" h-full w-full overflow-hidden rounded-[10px] bg-gray-100 dark:bg-zinc-900 md:rounded-[10px] md:p-4 ">
-                {children}
-            </div>
-        </motion.div>
+        <>
+            <motion.div
+                style={{
+                    rotateX: rotate,
+                    scale,
+                    boxShadow:
+                        "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
+                }}
+                className="max-w-8xl -mt-12 mx-auto h-[40rem] md:h-lvh  w-full border-4 border-[#6C6C6C] p-2 md:p-6 bg-[#222222] rounded-[10px] shadow-2xl"
+            >
+                <div className=" h-full w-full overflow-hidden rounded-[10px] bg-gray-100 dark:bg-zinc-900 md:rounded-[10px] md:p-4 ">
+                    {children}
+                </div>
+            </motion.div>
+            <motion.div
+                style={{
+                    scale,
+                }}
+                className="mx-auto w-32 md:w-48 h-10 md:h-8 bg-[#222222] border-2 border-[#6C6C6C] rounded-b-lg shadow-lg relative"
+            >
+                <div className="absolute w-full md:w-128 h-2 md:h-3 -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#222222] border-2 border-[#6C6C6C] rounded-lg"></div>
+            </motion.div>
+        </>
     );
 };

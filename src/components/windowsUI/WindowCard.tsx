@@ -1,26 +1,36 @@
 import React, { forwardRef, useState, useRef, useEffect } from "react";
 import Draggable from "react-draggable";
 
-const WindowCard = forwardRef(({ 
-    title, 
-    onClose, 
-    children, 
-    isActive, 
-    isVisible = true, 
+interface WindowCardProps {
+    title: string;
+    onClose: () => void;
+    children: React.ReactNode;
+    isActive?: boolean;
+    isVisible?: boolean;
+    onMinimize?: () => void;
+    onClick?: () => void;
+}
+
+const WindowCard = forwardRef<HTMLDivElement, WindowCardProps>(({
+    title,
+    onClose,
+    children,
+    isActive,
+    isVisible = true,
     onMinimize,
-    onClick 
+    onClick
 }, ref) => {
     const [isMaximized, setIsMaximized] = useState(false);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [isMobile, setIsMobile] = useState(false);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     
     // Desktop and mobile size presets
     const desktopSize = { width: '20vw', height: '50vh' };
     const mobileSize = { width: '95vw', height: '70vh' };
     
-    const [size, setSize] = useState(isMobile ? mobileSize : desktopSize);
+    const [size, setSize] = useState<{ width: string; height: string }>(desktopSize);
     const originalPosition = useRef({ x: 0, y: 0 });
-    const originalSize = useRef(isMobile ? { ...mobileSize } : { ...desktopSize });
+    const originalSize = useRef({ width: '20vw', height: '50vh' });
     const isInitialMount = useRef(true);
 
     // Handle window resize and mobile/desktop detection
@@ -36,7 +46,7 @@ const WindowCard = forwardRef(({
             }
             
             // Update position
-            if (ref?.current) {
+            if (ref && typeof ref !== 'function' && ref.current) {
                 const windowEl = ref.current;
                 const maxX = window.innerWidth - windowEl.offsetWidth;
                 const maxY = window.innerHeight - windowEl.offsetHeight;
@@ -53,6 +63,9 @@ const WindowCard = forwardRef(({
             }
         };
         
+        // Initial setup
+        setIsMobile(window.innerWidth < 768);
+
         if (isInitialMount.current) {
             handleResize();
             isInitialMount.current = false;
@@ -61,7 +74,7 @@ const WindowCard = forwardRef(({
         // Add event listener for window resize
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [ref]);
+    }, [ref, isMobile]);
 
     const handleMaximize = () => {
         if (isMaximized) {
@@ -70,18 +83,18 @@ const WindowCard = forwardRef(({
             setSize(originalSize.current);
         } else {
             // Save current position and size before maximizing
-            if (ref?.current) {
+            if (ref && typeof ref !== 'function' && ref.current) {
                 const rect = ref.current.getBoundingClientRect();
                 originalPosition.current = { x: rect.left, y: rect.top };
                 originalSize.current = { width: `${rect.width}px`, height: `${rect.height}px` };
                 
-                // Set to fullscreen
+                // Set to fullscreen within desktop bounds (excluding taskbar)
+                // Taskbar height is approximately 48px
+                const taskbarHeight = 48;
                 setPosition({ x: 0, y: 0 });
                 setSize({ 
-                    width: '100vw', 
-                    height: '100vh',
-                    margin: 0,
-                    borderRadius: 0
+                    width: '100%',
+                    height: `calc(100% - ${taskbarHeight}px)`
                 });
             }
         }
@@ -90,8 +103,8 @@ const WindowCard = forwardRef(({
 
     const handleMinimize = () => onMinimize?.();
 
-    const handleDrag = (e, data) => {
-        if (!isMaximized && ref?.current) {
+    const handleDrag = (_e: any, data: any) => {
+        if (!isMaximized && ref && typeof ref !== 'function' && ref.current) {
             const windowEl = ref.current;
             const maxX = window.innerWidth - windowEl.offsetWidth;
             const maxY = window.innerHeight - windowEl.offsetHeight;
@@ -108,7 +121,7 @@ const WindowCard = forwardRef(({
 
     return (
         <Draggable 
-            nodeRef={ref} 
+            nodeRef={ref as React.RefObject<HTMLElement>}
             handle=".drag-handle"
             bounds={isMaximized ? '' : 'parent'}
             cancel=".window-control"
@@ -124,16 +137,15 @@ const WindowCard = forwardRef(({
                 transition-all duration-200 ease-out
                 will-change-transform`}
                 style={{
-                    position: isMaximized ? 'fixed' : 'absolute',
-                    width: isMaximized ? '100%' : size.width,
-                    height: isMaximized ? '100%' : `calc(${size.height} - ${window.innerWidth < 768 ? '10%' : '0%'})`,
+                    position: 'absolute',
+                    width: size.width,
+                    height: isMaximized ? size.height : `calc(${size.height} - ${isMobile ? '10%' : '0%'})`,
                     left: isMaximized ? 0 : 'auto',
                     top: isMaximized ? 0 : 'auto',
                     zIndex: isActive ? (isMaximized ? 1000 : 50) : 40,
                     maxWidth: isMaximized ? '100%' : (isMobile ? '95vw' : '90vw'),
                     maxHeight: isMaximized ? '100%' : (isMobile ? '80vh' : '85vh'),
                     touchAction: 'none',
-                    ...(isMaximized ? size : {})
                 }}
             >
                 <div className="flex flex-col h-full">
@@ -210,5 +222,7 @@ const WindowCard = forwardRef(({
         </Draggable>
     );
 });
+
+WindowCard.displayName = 'WindowCard';
 
 export default WindowCard;

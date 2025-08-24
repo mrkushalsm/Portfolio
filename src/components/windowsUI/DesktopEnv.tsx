@@ -1,20 +1,12 @@
 import React, { useState, useRef } from "react";
 import WindowCard from "@/components/windowsUI/WindowCard";
 import Taskbar from "@/components/windowsUI/Taskbar";
-import projectIcon from "@/../public/assets/icons/project.png";
-import skillsIcon from "@/../public/assets/icons/skills.png";
-import aboutMeIcon from "@/../public/assets/icons/info.png";
-import portfolioIcon from "@/../public/assets/icons/exe.png";
-import terminalIcon from "@/../public/assets/icons/terminal.png";
-import certificateIcon from "@/../public/assets/icons/certificate.png";
-import blogsIcon from "@/../public/assets/icons/blogs.png";
-import resumeIcon from "@/../public/assets/icons/resume.png";
-import AboutMe from "../../pages/windowsUI/AboutMe";
-import Projects from "../../pages/windowsUI/Projects";
-import Skills from "../../pages/windowsUI/Skills";
-import Certificates from "../../pages/windowsUI/Certificates";
-import Blogs from "../../pages/windowsUI/Blogs";
-import Resume from "../../pages/windowsUI/Resume";
+import AboutMe from "@/pages/windowsUI/AboutMe";
+import Projects from "@/pages/windowsUI/Projects";
+import Skills from "@/pages/windowsUI/Skills";
+import Certificates from "@/pages/windowsUI/Certificates";
+import Blogs from "@/pages/windowsUI/Blogs";
+import Resume from "@/pages/windowsUI/Resume";
 import Terminal from "@/components/windowsUI/Terminal";
 import Image from "next/image";
 
@@ -34,7 +26,7 @@ const DesktopEnv = () => {
         "Resume": <Resume />,
         "Terminal": (
             <Terminal 
-                onCommand={(cmd: any) => {
+                onCommand={(cmd: never) => {
                     if (cmd === 'clear') return [];
                     return [`$ ${cmd}`, `Command not found: ${cmd}`];
                 }}
@@ -44,7 +36,7 @@ const DesktopEnv = () => {
     };
 
 
-    const openFolder = (folderName: any) => {
+    const openFolder = (folderName: never) => {
         // If window exists but is hidden, show it
         if (openWindows.includes(folderName) && windowVisibility[folderName] === false) {
             setWindowVisibility(prev => ({
@@ -68,7 +60,7 @@ const DesktopEnv = () => {
         setActiveWindow(folderName);
     };
 
-    const closeFolder = (folderName: any) => {
+    const closeFolder = (folderName: string) => {
         setOpenWindows(prev => prev.filter((name) => name !== folderName));
         setWindowVisibility(prev => {
             const newVis = {...prev};
@@ -93,19 +85,18 @@ const DesktopEnv = () => {
     };
 
     const desktopIcons = [
-        { name: "Projects", icon: projectIcon },
-        { name: "Skills", icon: skillsIcon },
-        { name: "About Me", icon: aboutMeIcon },
-        { name: "Certificates", icon: certificateIcon },
-        { name: "Blogs", icon: blogsIcon },
-        { name: "Resume", icon: resumeIcon },
-        { name: "portfolio.exe", icon: portfolioIcon },
+        { name: "Projects", icon: "/assets/icons/project.png" },
+        { name: "Skills", icon: "/assets/icons/skills.png" },
+        { name: "About Me", icon: "/assets/icons/info.png" },
+        { name: "Certificates", icon: "/assets/icons/certificate.png" },
+        { name: "Blogs", icon: "/assets/icons/blogs.png" },
+        { name: "Resume", icon: "/assets/icons/resume.png" },
     ];
     
     // Apps that should appear in the Start Menu but not on desktop
     const startMenuApps = [
         ...desktopIcons,
-        { name: "Terminal", icon: terminalIcon }
+        { name: "Terminal", icon: "/assets/icons/terminal.png" }
     ];
 
     return (

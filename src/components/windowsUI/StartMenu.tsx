@@ -8,6 +8,12 @@ const StartMenu = ({
     desktopIcons, 
     onAppClick,
     userName = "User" 
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    desktopIcons: { name: string; icon: string }[];
+    onAppClick: (appName: string) => void;
+    userName?: string;
 }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeTab, setActiveTab] = useState("pinned");
@@ -111,7 +117,7 @@ const StartMenu = ({
                                         onClose();
                                     }}
                                 >
-                                    <Image src={app.icon} alt={app.name} className="w-8 h-8 mb-1" />
+                                    <Image src={app.icon} alt={app.name} width={32} height={32} className="mb-1" />
                                     <span className="text-xs text-center truncate w-full">{app.name}</span>
                                 </button>
                             ))}
@@ -129,7 +135,7 @@ const StartMenu = ({
                                             onClose();
                                         }}
                                     >
-                                        <Image src={app.icon} alt={app.name} className="w-8 h-8 mb-1" />
+                                        <Image src={app.icon} alt={app.name} width={32} height={32} className="mb-1" />
                                         <span className="text-xs text-center truncate w-full">{app.name}</span>
                                     </button>
                                 ))}
@@ -146,7 +152,7 @@ const StartMenu = ({
                                         onClose();
                                     }}
                                 >
-                                    <Image src={app.icon} alt={app.name} className="w-8 h-8 mb-1" />
+                                    <Image src={app.icon} alt={app.name} width={32} height={32} className="mb-1" />
                                     <span className="text-xs text-center truncate w-full">{app.name}</span>
                                 </button>
                             ))}

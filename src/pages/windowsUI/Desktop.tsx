@@ -1,5 +1,5 @@
 import React from 'react'
-import DesktopEnv from "../../components/windowsUI/DesktopEnv.tsx";
+import DesktopEnv from "@/components/windowsUI/DesktopEnv";
 
 const Desktop = () => {
     return <DesktopEnv />;

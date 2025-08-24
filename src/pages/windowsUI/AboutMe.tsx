@@ -1,5 +1,4 @@
 import React from "react";
-import profilePic from "@/../public/assets/profile.jpeg";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import {FaXTwitter} from "react-icons/fa6";
 import Image from "next/image"
@@ -8,7 +7,7 @@ const AboutMe = () => {
     return (
         <div className="flex flex-col items-center text-center p-4">
             {/* Profile Image */}
-            <Image src={profilePic} alt="Profile" className="w-46 h-58 rounded-full mb-2 border-4 border-gray-300 shadow-lg" />
+            <Image src="/assets/profile.jpeg" alt="Profile" width={224} height={224} className="rounded-full mb-2 border-4 border-gray-300 shadow-lg"/>
 
             {/* Name & Profession */}
             <h2 className="text-lg font-semibold">Kushal S. M.</h2>
