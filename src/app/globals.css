@@ -7,10 +7,11 @@
 
 @theme {
   --color-darkgreen-500: #08340c;
-  --color-goldensilk-500: #c07c24;
+  --color-darkbrown-500: #734a16;
   --color-darkpurple-500: #593b92;
   --color-bloodred-500: #4c0000;
-  --color-yellowlight-500: #ffe000;
+  --color-greyish-500: #33332c;
+  --color-darkblue-500: #0e1d4f;
 }
 
 @theme inline {

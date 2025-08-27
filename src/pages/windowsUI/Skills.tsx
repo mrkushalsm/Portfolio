@@ -36,7 +36,9 @@ const Skills = () => {
                         <p><strong>Proficiency:</strong> {selectedSkill.proficiency}</p>
                         <p><strong>Experience:</strong> {selectedSkill.experience}</p>
                         <p className="mt-2">{selectedSkill.description}</p>
-                        <p><strong>Projects Used In:</strong> {selectedSkill.projects.join(", ")}</p>
+                        {selectedSkill?.projects && selectedSkill?.projects.length > 0 && (
+                            <p><strong>Projects Used In:</strong> {selectedSkill?.projects.join(", ")}</p>
+                        )}
                         <button onClick={() => setSelectedSkill(null)} className="mt-4 bg-red-500 text-white px-4 py-2 rounded-md cursor-pointer">Close</button>
                     </div>
                 </div>

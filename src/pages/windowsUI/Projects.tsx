@@ -1,29 +1,20 @@
 import React, { useState } from "react";
 import Image from "next/image"
+import projectsData from "@/data/projectsData";
+import { IconBrandGithub, IconExternalLink } from "@tabler/icons-react";
+
+type Project = {
+    name: string;
+    description: string;
+    image: any;
+    link: string;
+    github: string;
+};
 
 const Projects = () => {
-    const [selectedProject, setSelectedProject] = useState(null);
+    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-    const projects = [
-        {
-            name: "Weather App",
-            description: "A real-time weather app using OpenWeather API.",
-            image: "/assets/projectImg/weatherapp.png",
-            link: "https://weather-app-teal-omega.vercel.app/",
-        },
-        {
-            name: "Portfolio Website",
-            description: "A personal portfolio styled like a Windows desktop.",
-            image: "/assets/projectImg/portfoliowebsite.png",
-            link: "",
-        },
-        {
-            name: "Task Manager",
-            description: "A simple task management app with drag-and-drop features.",
-            image: "/assets/projectImg/portfoliowebsite.png",
-            link: "",
-        }
-    ];
+    const projects = projectsData;
 
     return (
         <div className="p-4 text-white">
@@ -52,12 +43,32 @@ const Projects = () => {
                             <Image src={selectedProject.image} alt={selectedProject.name} fill={true} className="w-full h-48 object-cover rounded-lg my-3" />
                         </div>
                         <p className="mt-4 text-gray-300">{selectedProject.description}</p>
-                        <button
-                            className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-md cursor-pointer"
-                            onClick={() => setSelectedProject(null)}
-                        >
-                            Close
-                        </button>
+                        <div className="flex gap-2 mt-4">
+                            {selectedProject.link && (
+                                <button
+                                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded-md cursor-pointer flex items-center gap-1.5"
+                                    onClick={() => window.open(selectedProject.link, '_blank')}
+                                >
+                                    <IconExternalLink size={16} />
+                                    Live Demo
+                                </button>
+                            )}
+                            {selectedProject.github && (
+                                <button
+                                    className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded-md cursor-pointer flex items-center gap-1.5"
+                                    onClick={() => window.open(selectedProject.github, '_blank')}
+                                >
+                                    <IconBrandGithub size={16} />
+                                    GitHub
+                                </button>
+                            )}
+                            <button
+                                className="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-sm rounded-md cursor-pointer"
+                                onClick={() => setSelectedProject(null)}
+                            >
+                                Close
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

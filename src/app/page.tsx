@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "motion/react";
 import { HeroHighlight, Highlight } from "@/components/ui/hero-highlight";
-import {Navigation} from "@/components/ui/navigation";
+import {Navigation} from "@/pages/portfolio/navigation";
 import {useEffect, useState} from "react";
 
 function useWindowSize() {
