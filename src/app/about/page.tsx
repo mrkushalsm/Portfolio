@@ -8,6 +8,7 @@ import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
 import { Education } from "@/pages/portfolio/education";
 import { useInView } from "@/hooks/useInView";
 import React from "react";
+import { ExperienceTimeline } from "@/pages/portfolio/experience";
 
 const quote = "Talk is cheap. Show me the code!\n\nwow";
 const author = "Linus Torvalds,";
@@ -55,6 +56,12 @@ export default function About() {
                     Education
                 </p>
                 <Education />
+            </div>
+            <div className="mt-20">
+                <p className="text-3xl md:text-7xl text-white font-bold inter-var text-center">
+                    Experience
+                </p>
+                <ExperienceTimeline />
             </div>
         </div>
     );
