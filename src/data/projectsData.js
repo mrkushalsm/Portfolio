@@ -1,8 +1,8 @@
-import weatherApp from "@/../public/assets/projectImg/weatherapp.png";
-import portfolioWebsite from "@/../public/assets/projectImg/portfoliowebsite.png";
-import attendanceTracker from "@/../public/assets/projectImg/attendancetracker.png";
-import mangaloreBusRoutes from "@/../public/assets/projectImg/mangalorebusroutes.png";
-import sainikSahayak from "@/../public/assets/projectImg/sainisahayak.png";
+import weatherApp from "@/../public/assets/projects/weatherapp.png";
+import portfolioWebsite from "@/../public/assets/projects/portfoliowebsite.png";
+import attendanceTracker from "@/../public/assets/projects/attendancetracker.png";
+import mangaloreBusRoutes from "@/../public/assets/projects/mangalorebusroutes.png";
+import sainikSahayak from "@/../public/assets/projects/sainisahayak.png";
 
 export const projects = [
     {
@@ -48,3 +48,5 @@ export const projects = [
         github: "https://github.com/so-sc/EarnEasy",
     },
 ];
+
+export default projects
