@@ -370,6 +370,9 @@ const HintOverlay = () => (
 );
 
 
+// Preload the model
+useGLTF.preload("/assets/model/computerglb.glb");
+
 // 3D Model Component
 const Model = ({ onMonitorClick, setMonitorPosition, setShowHint }) => {
     const { scene } = useGLTF("/assets/model/computerglb.glb", true);

@@ -40,15 +40,6 @@ const DesktopEnv = () => {
                 onExit={() => closeFolder("Terminal")}
             />
         ),
-        "Terminal": (
-            <Terminal 
-                onCommand={(cmd) => {
-                    if (cmd === 'clear') return [];
-                    return [`$ ${cmd}`, `Command not found: ${cmd}`];
-                }}
-                onExit={() => closeFolder("Terminal")}
-            />
-        ),
     };
 
 
