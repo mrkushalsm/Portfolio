@@ -163,18 +163,46 @@ const FORTUNES = [
 
 const Terminal = ({ onCommand, initialLogs = [], prompt = "$", showInput = true, onExit }) => {
     const [input, setInput] = useState("");
-    const [logs, setLogs] = useState(initialLogs);
+    const [logs, setLogs] = useState([]);
     const [currentDir, setCurrentDir] = useState("~");
+    const [isBooting, setIsBooting] = useState(true);
     const terminalRef = useRef(null);
 
-    // Add initial help message if no logs exist
+    // Realistic boot sequence
     useEffect(() => {
-        if (logs.length === 0) {
-            setLogs([
-                { text: 'Type "help" to see available commands', type: 'output' }
-            ]);
+        if (initialLogs.length > 0) {
+            setLogs(initialLogs);
+            setIsBooting(false);
+            return;
         }
-    }, [logs.length]);
+
+        const bootSequence = [
+            { text: "Portfolio OS [Version 1.0.0]", delay: 100 },
+            { text: "(c) 2025 Kushal S. M. All rights reserved.", delay: 200 },
+            { text: "", delay: 300 },
+            { text: 'Type "help" to see available commands', type: 'output', delay: 400 }
+        ];
+
+        let timeouts = [];
+        
+        bootSequence.forEach(({ text, type = 'output', delay }) => {
+            const timeout = setTimeout(() => {
+                setLogs(prev => [...prev, { text, type }]);
+            }, delay);
+            timeouts.push(timeout);
+        });
+
+        const finalTimeout = setTimeout(() => {
+            setIsBooting(false);
+        }, 500);
+        timeouts.push(finalTimeout);
+
+        return () => timeouts.forEach(clearTimeout);
+    }, []);
+
+    const username = "guest";
+    const hostname = "kushal-pc";
+    const promptString = `${username}@${hostname}:${currentDir}$`;
 
     const executeCommand = (command) => {
         const args = command.trim().split(/\s+/);
@@ -334,7 +362,7 @@ const Terminal = ({ onCommand, initialLogs = [], prompt = "$", showInput = true,
         if (e.key === 'Enter' && input.trim()) {
             const command = input.trim();
             // Add command to logs
-            setLogs(prev => [...prev, { text: command, type: 'command' }]);
+            setLogs(prev => [...prev, { text: command, type: 'command', dir: currentDir }]);
             // Process command
             executeCommand(command);
             setInput("");
@@ -362,9 +390,11 @@ const Terminal = ({ onCommand, initialLogs = [], prompt = "$", showInput = true,
             ref={terminalRef}
             className="h-full bg-black text-green-400 font-mono text-sm p-4 overflow-auto"
             style={{
-                background: 'rgba(0, 0, 0, 0.95)',
-                backgroundImage: 'linear-gradient(rgba(0, 255, 0, 0.05) 1px, transparent 1px)',
-                backgroundSize: '100% 20px',
+                background: 'rgba(10, 10, 10, 0.95)',
+                backgroundImage: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
+                backgroundSize: '100% 2px, 3px 100%',
+                boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.5)',
+                fontFamily: "'Courier New', Courier, monospace",
             }}
             onClick={() => document.querySelector('.terminal-input')?.focus()}
         >
@@ -376,24 +406,30 @@ const Terminal = ({ onCommand, initialLogs = [], prompt = "$", showInput = true,
                             log.type === 'error' ? 'text-red-400' : 'text-gray-300'
                     }`}
                 >
-                    {log.type === 'prompt' ? (
-                        <div className="flex items-center">
-                            <span className="text-green-400">{currentDir} {prompt}</span>
-                            <span className="ml-1.5 inline-block w-1.5 h-4 bg-green-400 animate-pulse relative top-0.5"></span>
+                    {log.type === 'command' ? (
+                        <div className="flex items-center flex-wrap">
+                            <span className="text-green-400 mr-2" style={{ textShadow: '0 0 5px rgba(74, 222, 128, 0.5)' }}>
+                                {username}@{hostname}:{log.dir || '~'}$
+                            </span>
+                            <span className="text-white" style={{ textShadow: '0 0 5px rgba(255, 255, 255, 0.5)' }}>{log.text}</span>
                         </div>
-                    ) : log.text}
+                    ) : (
+                        <span style={{ textShadow: '0 0 5px rgba(74, 222, 128, 0.5)' }}>{log.text}</span>
+                    )}
                 </div>
             ))}
-            {showInput && (
+            {!isBooting && showInput && (
                 <div className="flex items-center flex-nowrap">
-                    <span className="text-green-400 whitespace-nowrap">{currentDir}</span>
-                    <span className="text-green-400 whitespace-nowrap">{prompt}</span>
+                    <span className="text-green-400 whitespace-nowrap mr-2" style={{ textShadow: '0 0 5px rgba(74, 222, 128, 0.5)' }}>
+                        {promptString}
+                    </span>
                     <input
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        className="terminal-input bg-transparent border-none outline-none ml-1.5 text-green-400 w-full relative min-w-0 flex-1"
+                        className="terminal-input bg-transparent border-none outline-none text-white w-full relative min-w-0 flex-1 font-mono"
+                        style={{ textShadow: '0 0 5px rgba(255, 255, 255, 0.5)' }}
                         autoFocus
                         spellCheck="false"
                     />
