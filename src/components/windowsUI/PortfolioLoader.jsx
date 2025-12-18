@@ -1,5 +1,7 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 
 const TerminalLine = ({ text, type, delay = 0, showCursor = false, onTypingComplete }) => {
     const [displayText, setDisplayText] = useState("");
@@ -42,7 +44,7 @@ const TerminalLine = ({ text, type, delay = 0, showCursor = false, onTypingCompl
 };
 
 const PortfolioLoader = () => {
-    const navigate = useNavigate();
+    const router = useRouter();
     const [progress, setProgress] = useState(0);
     const [lines, setLines] = useState([]);
     const containerRef = useRef(null);
@@ -128,7 +130,7 @@ const PortfolioLoader = () => {
             // Navigate when done
             if (mounted) {
                 timeoutId = setTimeout(() => {
-                    if (mounted) navigate("/portfolio");
+                    if (mounted) router.push("/portfolio");
                 }, 1000);
             }
         };
@@ -137,7 +139,7 @@ const PortfolioLoader = () => {
 
         // Auto-navigate after 8 seconds regardless of progress
         const safetyTimeout = setTimeout(() => {
-            if (mounted) navigate("/portfolio");
+            if (mounted) router.push("/portfolio");
         }, 8000);
 
         return () => {
@@ -145,7 +147,7 @@ const PortfolioLoader = () => {
             clearTimeout(timeoutId);
             clearTimeout(safetyTimeout);
         };
-    }, [navigate]);
+    }, [router]);
 
     return (
         <div 

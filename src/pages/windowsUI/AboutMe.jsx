@@ -1,5 +1,5 @@
 import React from "react";
-import profilePic from "/assets/profile.jpeg";
+const profilePic = "/assets/profile.jpeg";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import {FaXTwitter} from "react-icons/fa6";
 

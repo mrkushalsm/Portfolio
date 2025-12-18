@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import windowsIcon from "/assets/taskbar/windows-icon.png";
-import volumeMute from "/assets/taskbar/volume-mute.png";
-import wifi from "/assets/taskbar/wifi.png";
-import battery from "/assets/taskbar/battery.png";
+const windowsIcon = "/assets/taskbar/windows-icon.png";
+const volumeMute = "/assets/taskbar/volume-mute.png";
+const wifi = "/assets/taskbar/wifi.png";
+const battery = "/assets/taskbar/battery.png";
 import StartMenu from "./StartMenu";
 
 const Taskbar = ({ 

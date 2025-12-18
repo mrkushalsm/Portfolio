@@ -1,18 +1,20 @@
+"use client";
+
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import windowsIcon from "/assets/taskbar/windows-icon.png";
+import { useRouter } from "next/navigation";
+const windowsIcon = "/assets/taskbar/windows-icon.png";
 
 const BootScreen = () => {
-    const navigate = useNavigate();
+    const router = useRouter();
 
     useEffect(() => {
         // ⏳ Redirect to Desktop after 3 seconds
         const timer = setTimeout(() => {
-            navigate("/desktop");
+            router.push("/desktop");
         }, 3000);
 
         return () => clearTimeout(timer);
-    }, [navigate]);
+    }, [router]);
 
     return (
         <div className="h-screen w-screen bg-black flex flex-col items-center justify-center">

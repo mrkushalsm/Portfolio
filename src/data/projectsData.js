@@ -1,8 +1,8 @@
-import weatherApp from "/assets/projectImg/weatherapp.png";
-import portfolioWebsite from "/assets/projectImg/portfoliowebsite.png";
-import attendanceTracker from "/assets/projectImg/attendancetracker.png";
-import mangaloreBusRoutes from "/assets/projectImg/mangalorebusroutes.png";
-import sainikSahayak from "/assets/projectImg/sainisahayak.png";
+const weatherApp = "/assets/projectImg/weatherapp.png";
+const portfolioWebsite = "/assets/projectImg/portfoliowebsite.png";
+const attendanceTracker = "/assets/projectImg/attendancetracker.png";
+const mangaloreBusRoutes = "/assets/projectImg/mangalorebusroutes.png";
+const sainikSahayak = "/assets/projectImg/sainisahayak.png";
 
 export const projects = [
     {
@@ -20,7 +20,7 @@ export const projects = [
         github: "https://github.com/mrkushalsm/Portfolio",
     },
     {
-        name:"Armed Forces Welfare Management System",
+        name: "Armed Forces Welfare Management System",
         description: "A comprehensive welfare management system designed specifically for armed forces personnel and their families.",
         image: sainikSahayak,
         link: "https://quantum-skill-sangam25.vercel.app/",

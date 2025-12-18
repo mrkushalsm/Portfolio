@@ -1,22 +1,20 @@
 import React, { useState, useRef } from "react";
 import WindowCard from "./WindowCard.jsx";
 import Taskbar from "./Taskbar.jsx";
-import wallpaper from "/assets/wallpaper.jpg";
-import projectIcon from "/assets/icons/project.png";
-import skillsIcon from "/assets/icons/skills.png";
-import aboutMeIcon from "/assets/icons/info.png";
-import portfolioIcon from "/assets/icons/exe.png";
-import terminalIcon from "/assets/icons/terminal.png";
-import certificateIcon from "/assets/icons/certificate.png";
-import blogsIcon from "/assets/icons/blogs.png";
-import resumeIcon from "/assets/icons/resume.png";
+const wallpaper = "/assets/wallpaper.jpg";
+const projectIcon = "/assets/icons/project.png";
+const skillsIcon = "/assets/icons/skills.png";
+const aboutMeIcon = "/assets/icons/info.png";
+const terminalIcon = "/assets/icons/terminal.png";
+const certificateIcon = "/assets/icons/certificate.png";
+const blogsIcon = "/assets/icons/blogs.png";
+const resumeIcon = "/assets/icons/resume.png";
 import AboutMe from "../../pages/windowsUI/AboutMe";
 import Projects from "../../pages/windowsUI/Projects";
 import Skills from "../../pages/windowsUI/Skills";
 import Certificates from "../../pages/windowsUI/Certificates.jsx";
 import Blogs from "../../pages/windowsUI/Blogs.jsx";
 import Resume from "../../pages/windowsUI/Resume.jsx";
-import PortfolioLoader from "./PortfolioLoader.jsx";
 import Terminal from "./Terminal.jsx";
 
 const DesktopEnv = () => {
@@ -42,7 +40,15 @@ const DesktopEnv = () => {
                 onExit={() => closeFolder("Terminal")}
             />
         ),
-        "portfolio.exe": <PortfolioLoader />, // ✅ Portfolio window shows a terminal-style loader
+        "Terminal": (
+            <Terminal 
+                onCommand={(cmd) => {
+                    if (cmd === 'clear') return [];
+                    return [`$ ${cmd}`, `Command not found: ${cmd}`];
+                }}
+                onExit={() => closeFolder("Terminal")}
+            />
+        ),
     };
 
 
@@ -101,7 +107,6 @@ const DesktopEnv = () => {
         { name: "Certificates", icon: certificateIcon },
         { name: "Blogs", icon: blogsIcon },
         { name: "Resume", icon: resumeIcon },
-        { name: "portfolio.exe", icon: portfolioIcon },
     ];
     
     // Apps that should appear in the Start Menu but not on desktop

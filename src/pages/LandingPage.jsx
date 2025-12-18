@@ -326,16 +326,16 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { useCursor, useGLTF, useProgress, Html } from "@react-three/drei";
 import { gsap } from "gsap";
 import * as THREE from "three";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
 
 // Loader Overlay with percentage and skip option
 const LoaderOverlay = () => {
     const { progress } = useProgress();
-    const navigate = useNavigate();
+    const router = useRouter();
 
     const handleSkip = () => {
-        navigate('/boot');
+        router.push('/boot');
     };
 
     return (
@@ -419,7 +419,7 @@ const Model = ({ onMonitorClick, setMonitorPosition, setShowHint }) => {
 const CameraController = ({ zoomToMonitor, monitorPosition }) => {
     const { camera, scene, gl } = useThree();
     const isAnimating = useRef(false);
-    const navigate = useNavigate();
+    const router = useRouter();
 
     useEffect(() => {
         camera.position.set(0.032, 0.121, 0.5);
@@ -463,11 +463,11 @@ const CameraController = ({ zoomToMonitor, monitorPosition }) => {
                 duration: 1.5,
                 ease: "power2.inOut",
                 onComplete: () => {
-                    navigate("/boot");
+                    router.push("/boot");
                 },
             });
         }
-    }, [zoomToMonitor, monitorPosition, camera, navigate]);
+    }, [zoomToMonitor, monitorPosition, camera, router]);
 
     return null;
 };
