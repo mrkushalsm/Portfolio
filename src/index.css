@@ -1,7 +1,5 @@
 @import "tailwindcss";
-@plugin "daisyui" {
-    themes: light --default, dark --prefersdark, black;
-}
+
 
 html {
     scroll-behavior: smooth;
@@ -13,6 +11,8 @@ html {
 }
 
 .no-scrollbar {
-    -ms-overflow-style: none; /* Hide scrollbar for IE & Edge */
-    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    -ms-overflow-style: none;
+    /* Hide scrollbar for IE & Edge */
+    scrollbar-width: none;
+    /* Hide scrollbar for Firefox */
 }

@@ -15,8 +15,8 @@ const WindowCard = forwardRef(({
     const [position, setPosition] = useState({ x: 0, y: 0 });
     
     // Desktop and mobile size presets
-    const desktopSize = { width: '20vw', height: '50vh' };
-    const mobileSize = { width: '95vw', height: '70vh' };
+    const desktopSize = React.useMemo(() => ({ width: '20vw', height: '50vh' }), []);
+    const mobileSize = React.useMemo(() => ({ width: '95vw', height: '70vh' }), []);
     
     const [size, setSize] = useState(isMobile ? mobileSize : desktopSize);
     const originalPosition = useRef({ x: 0, y: 0 });
@@ -61,7 +61,7 @@ const WindowCard = forwardRef(({
         // Add event listener for window resize
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [ref]);
+    }, [ref, isMobile, mobileSize, desktopSize]);
 
     const handleMaximize = () => {
         if (isMaximized) {

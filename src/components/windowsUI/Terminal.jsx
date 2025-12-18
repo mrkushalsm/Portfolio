@@ -174,7 +174,7 @@ const Terminal = ({ onCommand, initialLogs = [], prompt = "$", showInput = true,
                 { text: 'Type "help" to see available commands', type: 'output' }
             ]);
         }
-    }, []);
+    }, [logs.length]);
 
     const executeCommand = (command) => {
         const args = command.trim().split(/\s+/);
