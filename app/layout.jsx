@@ -1,5 +1,7 @@
 import "./globals.css";
 
+import { FileSystemProvider } from '../src/context/FileSystemContext';
+
 // eslint-disable-next-line react-refresh/only-export-components
 export const metadata = {
   title: "Portfolio",
@@ -12,7 +14,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="no-scrollbar">
-      <body>{children}</body>
+      <body>
+        <FileSystemProvider>
+            {children}
+        </FileSystemProvider>
+      </body>
     </html>
   );
 }
