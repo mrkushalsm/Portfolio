@@ -1,135 +1,131 @@
 import React, { useState, useEffect, useRef } from "react";
-const windowsIcon = "/assets/taskbar/windows-icon.png";
-const volumeMute = "/assets/taskbar/volume-mute.png";
-const wifi = "/assets/taskbar/wifi.png";
-const battery = "/assets/taskbar/battery.png";
-import StartMenu from "./StartMenu";
+import { FaWifi, FaBatteryFull, FaVolumeUp, FaChevronUp, FaSearch } from "react-icons/fa";
+import StartMenu from "../win10/StartMenu";
 
 const Taskbar = ({ 
-    openWindows, 
-    activeWindow, 
-    setActiveWindow, 
-    desktopIcons,
-    windowVisibility = {},
-    onToggleMinimize,
-    onOpenApp
+    windows = [], 
+    activeWindowId, 
+    onToggleMinimize, 
+    onFocus,
+    startApps = [],
+    pinnedApps = [] 
 }) => {
-    const [time, setTime] = useState(new Date());
-    const [showStartMenu, setShowStartMenu] = useState(false);
-    const startButtonRef = useRef(null);
+    const [currentTime, setCurrentTime] = useState(new Date());
+    const [isStartOpen, setIsStartOpen] = useState(false);
 
     useEffect(() => {
-        // Update immediately to avoid initial delay
-        setTime(new Date());
-        
-        // Then update every second
-        const timer = setInterval(() => {
-            setTime(new Date());
-        }, 1000);
-
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
 
-    const handleWindowClick = (window) => {
-        if (windowVisibility[window] === false) {
-            // If window is minimized, restore it
-            onToggleMinimize?.(window);
-            setActiveWindow(window);
-        } else if (activeWindow === window) {
-            // If window is active, minimize it
-            onToggleMinimize?.(window);
-        } else {
-            // Bring to front and focus
-            setActiveWindow(window);
-        }
+    const formatTime = (date) => {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const formatDate = (date) => {
+        return date.toLocaleDateString([], { month: '2-digit', day: '2-digit', year: 'numeric' });
     };
 
     return (
-        <div className="fixed bottom-0 left-0 w-full bg-zinc-900/95 backdrop-blur-sm text-white p-1.5 flex justify-between items-center border-t border-zinc-700 z-[9998] overflow-hidden">
-            {/* Left side: Windows button + Opened Apps */}
-            <div className="flex-1 flex items-center h-12">
-                <div className="flex items-center h-full pl-2 pr-1 relative" style={{ zIndex: 10000 }}>
-                    <button 
-                        ref={startButtonRef}
-                        data-start-button
-                        className={`p-2 rounded w-10 h-10 flex-shrink-0 flex items-center justify-center transition-colors ${
-                            showStartMenu ? 'bg-zinc-600/50' : 'hover:bg-zinc-700/50'
-                        }`}
-                        onClick={() => setShowStartMenu(!showStartMenu)}
+        <>
+            <StartMenu 
+                isOpen={isStartOpen} 
+                onClose={() => setIsStartOpen(false)} 
+                apps={startApps} 
+            />
+            
+            <div className="absolute bottom-0 w-full h-10 bg-[#101010cc] backdrop-blur-md flex items-center justify-between z-[10000] select-none text-white border-t border-[#333]">
+                {/* Left Section: Start & Search */}
+                <div className="flex items-center h-full">
+                    {/* Start Button */}
+                    <div 
+                        className={`h-full w-12 flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer group ${isStartOpen ? 'bg-white/10' : ''}`}
+                        onClick={() => setIsStartOpen(!isStartOpen)}
                     >
-                        <img src={windowsIcon} alt="Windows icon" className="w-6 h-6" />
-                    </button>
-                    {showStartMenu && (
-                        <StartMenu
-                            isOpen={showStartMenu}
-                            onClose={() => setShowStartMenu(false)}
-                            desktopIcons={desktopIcons}
-                            onAppClick={onOpenApp}
-                        />
-                    )}
-                </div>
-                <div className="h-8 w-px bg-zinc-600 mx-1 mr-2"></div>
-
-                {/* App Icons */}
-                <div className="flex-1 flex items-center h-full overflow-x-auto hide-scrollbar px-1">
-                    <div className="flex items-center space-x-1 h-full">
-                        {openWindows.map((window) => {
-                            const iconData = desktopIcons.find((icon) => icon.name === window);
-                            return (
-                                <button
-                                    key={window}
-                                    className={`p-2 rounded cursor-pointer flex items-center justify-center w-10 h-10 flex-shrink-0 ${
-                                        activeWindow === window && windowVisibility[window] !== false
-                                            ? "bg-gray-500/30" 
-                                            : "hover:bg-gray-600/30"
-                                    }`}
-                                    onClick={() => handleWindowClick(window)}
-                                >
-                                    {iconData && (
-                                        <img 
-                                            src={iconData.icon} 
-                                            alt={window} 
-                                            className="w-6 h-6" 
-                                        />
-                                    )}
-                                </button>
-                            );
-                        })}
+                       <img src="/assets/icons/win10/win-start.png" alt="Start" className="h-4 w-4 drop-shadow-[0_0_2px_rgba(255,255,255,0.5)] group-hover:brightness-125 transition-transform group-active:scale-95" 
+                            onError={(e) => e.target.src = "https://img.icons8.com/color/48/windows-10.png"}
+                       />
                     </div>
+
+                    {/* Search Bar */}
+                    <div className="hidden md:flex items-center h-full">
+                        <div className="flex items-center bg-white h-full w-[20rem] px-3 border border-[#333] hover:border-[#666] focus-within:border-[#0078d7] transition-colors">
+                            <FaSearch className="text-gray-500 mr-3 w-3 h-3" />
+                            <input 
+                                type="text" 
+                                placeholder="Type here to search" 
+                                className="bg-transparent border-none outline-none text-black text-xs w-full placeholder-gray-500 font-normal"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Cortana/Task View (Optional Icons) */}
+                    <div className="h-full w-10 flex items-center justify-center hover:bg-white/10 cursor-pointer">
+                        <div className="w-4 h-4 rounded-full border-2 border-white/80"></div>
+                    </div>
+                </div>
+
+                {/* Middle Section: Active Apps */}
+                <div className="flex-1 flex items-center h-full pl-2 overflow-x-auto no-scrollbar">
+                    {windows.map((win) => (
+                        <div
+                            key={win.id}
+                            className={`h-full min-w-[3rem] px-3 flex items-center justify-center hover:bg-white/10 transition-all cursor-pointer relative group
+                                ${activeWindowId === win.id && !win.isMinimized ? 'bg-white/5' : 'hover:bg-white/5'}
+                            `}
+                            onClick={() => win.isMinimized || activeWindowId !== win.id ? onFocus(win.id) : onToggleMinimize(win.id)}
+                            title={win.title}
+                        >
+                            <img 
+                               src={win.icon && win.icon.includes('.') ? `/assets/icons/win10/${win.icon}.ico` : `/assets/icons/win10/${win.icon || 'file-text'}.ico`} 
+                               onError={(e) => {
+                                   if (!e.target.src.includes('file-text')) e.target.src = "/assets/icons/win10/file-text.ico";
+                               }}
+                               alt={win.title} 
+                               className={`w-5 h-5 ${win.isMinimized ? 'opacity-70' : 'opacity-100'} transition-transform group-hover:scale-105`} 
+                            />
+                            {/* Running Indicator - Windows 10 Style (Blue line at bottom) */}
+                             <div className={`absolute bottom-0 left-0 right-0 h-[3px] transition-all rounded-full mx-1
+                                ${activeWindowId === win.id ? 'bg-[#76b9ed] scale-x-100' : 'bg-gray-400 scale-x-0 group-hover:scale-x-50'}
+                            `}></div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Right Section: System Tray */}
+                <div className="flex items-center h-full px-2 text-xs font-light gap-1">
+                    <div className="h-full px-1 flex items-center justify-center hover:bg-white/10 cursor-pointer">
+                        <FaChevronUp size={10} />
+                    </div>
+                    <div className="h-full px-1 flex items-center justify-center hover:bg-white/10 cursor-pointer">
+                        <img src="/assets/taskbar/wifi.png" alt="Wifi" className="h-4" />
+                    </div>
+                    <div className="h-full px-1 flex items-center justify-center hover:bg-white/10 cursor-pointer">
+                        <img src="/assets/taskbar/battery.png" alt="Battery" className="h-4" />
+                    </div>
+                    <div className="h-full px-1 flex items-center justify-center hover:bg-white/10 cursor-pointer">
+                         <FaVolumeUp size={14} />
+                    </div>
+                    
+                    {/* Clock */}
+                    <div className="flex flex-col items-end justify-center h-full px-2 hover:bg-white/10 cursor-pointer text-center leading-tight">
+                        <span>{formatTime(currentTime)}</span>
+                        <span className="text-[10px]">{formatDate(currentTime)}</span>
+                    </div>
+
+                    {/* Notifications */}
+                    <div className="h-full w-10 flex items-center justify-center hover:bg-white/10 cursor-pointer border-l border-gray-600/30 ml-1">
+                       {/* Action Center Icon */}
+                       <svg width="14" height="14" viewBox="0 0 20 20" fill="white">
+                           <path d="M18 2h-16c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-12c0-1.1-.9-2-2-2zm-16 14v-12h16l-8 5-8-5v12z"/>
+                       </svg>
+                    </div>
+                    
+                    {/* Show Desktop Line */}
+                    <div className="w-1.5 h-full border-l border-gray-500/50 cursor-pointer hover:bg-white/20 ml-1"></div>
                 </div>
             </div>
-
-            {/* Right side: System Tray */}
-            <div className="flex items-center h-12 pr-2">
-                <div className="flex items-center space-x-1 h-full">
-                    <div className="hidden sm:flex items-center space-x-1 h-full">
-                        <button className="p-2 rounded hover:bg-zinc-800 w-10 h-10 flex items-center justify-center">
-                            <img src={wifi} alt="WiFi" className="w-5 h-5" />
-                        </button>
-                        <button className="p-2 rounded hover:bg-zinc-800 w-10 h-10 flex items-center justify-center">
-                            <img src={battery} alt="Battery" className="w-5 h-5" />
-                        </button>
-                        <button className="p-2 rounded hover:bg-zinc-800 w-10 h-10 flex items-center justify-center">
-                            <img src={volumeMute} alt="Volume" className="w-5 h-5" />
-                        </button>
-                    </div>
-                    <div className="h-8 w-px bg-zinc-600 mx-1"></div>
-                    <div className="text-sm px-3 h-9 flex items-center bg-zinc-800/50 rounded hover:bg-zinc-700/70 ml-5">
-                        {time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </div>
-                </div>
-            </div>
-
-            <style>{`
-                .hide-scrollbar {
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
-                }
-                .hide-scrollbar::-webkit-scrollbar {
-                    display: none;
-                }
-            `}</style>
-        </div>
+        </>
     );
 };
 

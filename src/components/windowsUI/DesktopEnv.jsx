@@ -1,185 +1,346 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { FaGithub, FaLinkedin } from "react-icons/fa";
+import { useFileSystem } from "../../context/FileSystemContext";
 import WindowCard from "./WindowCard.jsx";
 import Taskbar from "./Taskbar.jsx";
-const wallpaper = "/assets/wallpaper.jpg";
-const projectIcon = "/assets/icons/project.png";
-const skillsIcon = "/assets/icons/skills.png";
-const aboutMeIcon = "/assets/icons/info.png";
-const terminalIcon = "/assets/icons/terminal.png";
-const certificateIcon = "/assets/icons/certificate.png";
-const blogsIcon = "/assets/icons/blogs.png";
-const resumeIcon = "/assets/icons/resume.png";
+import FileIcon from "../win10/FileIcon";
+import FileExplorer from "../win10/FileExplorer";
+import Browser from "../win10/Browser";
+import VSCode from "../win10/VSCode";
+import Obsidian from "../win10/Obsidian.jsx";
+
+import Terminal from "./Terminal.jsx"; 
 import AboutMe from "../../pages/windowsUI/AboutMe";
-import Projects from "../../pages/windowsUI/Projects";
-import Skills from "../../pages/windowsUI/Skills";
-import Certificates from "../../pages/windowsUI/Certificates.jsx";
-import Blogs from "../../pages/windowsUI/Blogs.jsx";
 import Resume from "../../pages/windowsUI/Resume.jsx";
-import Terminal from "./Terminal.jsx";
+
+const wallpaper = "/assets/wallpaper.jpg";
 
 const DesktopEnv = () => {
-    const [openWindows, setOpenWindows] = useState([]);
-    const [activeWindow, setActiveWindow] = useState(null);
-    const [windowVisibility, setWindowVisibility] = useState({});
-    const windowRefs = useRef({});
+    const { getDirContent } = useFileSystem();
+    // Windows state: [{ id, title, icon, component, isMinimized, zIndex }]
+    const [windows, setWindows] = useState([]);
+    const [activeWindowId, setActiveWindowId] = useState(null);
+    const zIndexRef = useRef(100);
+    
+    // Fetch desktop content
+    const desktopContent = getDirContent("C:/Users/Kushal/Desktop") || {};
 
-    // Define a mapping of components
-    const componentMap = {
-        "Projects": <Projects />,
-        "Skills": <Skills />,
-        "About Me": <AboutMe />,
-        "Certificates": <Certificates />,
-        "Blogs": <Blogs />,
-        "Resume": <Resume />,
-        "Terminal": (
-            <Terminal 
-                onCommand={(cmd) => {
-                    if (cmd === 'clear') return [];
-                    return [`$ ${cmd}`, `Command not found: ${cmd}`];
-                }}
-                onExit={() => closeFolder("Terminal")}
-            />
-        ),
-    };
-
-
-    const openFolder = (folderName) => {
-        // If window exists but is hidden, show it
-        if (openWindows.includes(folderName) && windowVisibility[folderName] === false) {
-            setWindowVisibility(prev => ({
-                ...prev,
-                [folderName]: true
-            }));
-            setActiveWindow(folderName);
+    const openWindow = (id, title, component, icon = "application") => {
+        // Check if window already exists
+        const existingWindow = windows.find(w => w.id === id);
+        if (existingWindow) {
+            if (existingWindow.isMinimized) {
+                toggleMinimize(id);
+            }
+            focusWindow(id);
             return;
         }
 
-        // If window doesn't exist, create it
-        if (!openWindows.includes(folderName)) {
-            setOpenWindows(prev => [...prev, folderName]);
-            windowRefs.current[folderName] = React.createRef();
-            setWindowVisibility(prev => ({
-                ...prev,
-                [folderName]: true
-            }));
-        }
-        
-        setActiveWindow(folderName);
+        // Increment global Z-index counter strictly
+        zIndexRef.current += 1;
+        const newZ = zIndexRef.current;
+
+        const newWindow = {
+            id,
+            title,
+            icon,
+            component,
+            isMinimized: false,
+            zIndex: newZ
+        };
+
+        setWindows(prev => [...prev, newWindow]);
+        setActiveWindowId(id);
     };
 
-    const closeFolder = (folderName) => {
-        setOpenWindows(prev => prev.filter((name) => name !== folderName));
-        setWindowVisibility(prev => {
-            const newVis = {...prev};
-            delete newVis[folderName];
-            return newVis;
-        });
-        if (activeWindow === folderName) {
-            setActiveWindow(null);
+    const closeWindow = (id) => {
+        setWindows(prev => prev.filter(w => w.id !== id));
+        if (activeWindowId === id) {
+             setActiveWindowId(null);
         }
     };
 
-    const toggleMinimizeWindow = (windowName) => {
-        setWindowVisibility(prev => ({
-            ...prev,
-            [windowName]: !prev[windowName]
+    const focusWindow = (id) => {
+        // Increment global counter for every focus action
+        zIndexRef.current += 1;
+        const newZ = zIndexRef.current;
+
+        setActiveWindowId(id);
+        setWindows(prev => prev.map(w => 
+            w.id === id ? { ...w, zIndex: newZ, isMinimized: false } : w
+        ));
+    };
+
+    const toggleMinimize = (id) => {
+        setWindows(prev => prev.map(w => {
+            if (w.id === id) {
+                // If we are minimizing the active window, clear active
+                if (!w.isMinimized && activeWindowId === id) {
+                    setActiveWindowId(null);
+                }
+                return { ...w, isMinimized: !w.isMinimized };
+            }
+            return w;
         }));
-        
-        // If we're minimizing the active window, clear the active window
-        if (activeWindow === windowName && windowVisibility[windowName] !== false) {
-            setActiveWindow(null);
+    };
+
+    // Start Menu Icons Helper - Moved up to be reusable
+    const getIconSrc = (iconName) => {
+        const map = {
+            "folder": "/assets/icons/win10/folder.ico",
+            "file-text": "/assets/icons/win10/file-text.ico",
+            "file-pdf": "/assets/icons/win10/file-pdf.ico",
+            "edge": "/assets/icons/win10/edge.png",
+            "terminal": "/assets/icons/terminal.ico",
+            "vscode": "/assets/icons/win10/vscode.png",
+            "this-pc": "/assets/icons/win10/this-pc.ico",
+            "photos": "/assets/icons/win10/photos.ico",
+            "settings": "/assets/icons/win10/settings.png",
+            "user-circle": "/assets/icons/win10/user-circle.png", // Or generic
+            "github": "/assets/icons/github.png"
+        };
+        // Normalize: if it looks like a path, return it. If it's a key, map it.
+        if (iconName && (iconName.startsWith('/') || iconName.startsWith('http'))) return iconName;
+        return map[iconName] || "/assets/icons/win10/application.ico";
+    };
+
+    // File Open Handler
+    const handleFileOpen = (name, item) => {
+        if (item.type === 'folder' || item.type === 'drive') {
+            // Use provided path or default to Desktop 
+            const path = item.path || `C:/Users/Kushal/Desktop/${name}`; 
+            
+            openWindow(
+                `explorer-${name}`, 
+                name, 
+                <FileExplorer 
+                    initialPath={path} 
+                    onOpenFile={handleFileOpen}
+                />,
+                getIconSrc("folder")
+            );
+        } else if (item.type === 'file' || item.type === 'shortcut') {
+             // Handle Shortcuts (Website links)
+             if (item.type === 'shortcut' || (item.target && typeof item.target === 'string' && item.target.startsWith('http'))) {
+                 const targetUrl = item.target;
+                 if (targetUrl && typeof targetUrl === 'string' && targetUrl.startsWith('http')) {
+                     
+                     // SPECIAL CASE: README shortcuts (which we pointed to github1s) -> VSCode Native App
+                     // This gives the "Native App" feel for Readmes, separate from Browser
+                     if (name === "README.md" || targetUrl.includes("/blob/main/README.md")) {
+                         // Ensure we have a unique ID for multiple readmes
+                         const readmeId = `readme-${name}-${Date.now()}`;
+                         // Force github1s URL if it somehow came in as github.com (safety)
+                         const safeUrl = targetUrl.replace('github.com', 'github1s.com');
+                         
+                         // Extract Project Name from URL for the Window Title
+                         // Expected format: https://github1s.com/user/[Project-Name]/blob...
+                         let projectTitle = "README.md";
+                         try {
+                             const urlParts = safeUrl.split('/');
+                             if (urlParts.length >= 5) {
+                                 // urlParts[4] should be the repo name
+                                 projectTitle = urlParts[4].replace(/-/g, ' '); 
+                             }
+                         } catch (e) {
+                             console.error("Error parsing project name", e);
+                         }
+
+                         openWindow(readmeId, `VSCode - ${projectTitle}`, <VSCode initialUrl={safeUrl} />, getIconSrc("vscode")); 
+                         return;
+                     }
+
+                     // All other links -> Internal Browser (Standard)
+                     openWindow(`browser-${name}-${Date.now()}`, name, <Browser initialUrl={targetUrl} />, getIconSrc("edge"));
+                     return;
+                 }
+             }
+
+             // Handle Apps
+             if (item.fileType === 'app') {
+                  const uniqueId = `${item.appName.toLowerCase().replace(/\s/g, '-')}-${Date.now()}`;
+                  
+                  if (item.appName === 'Edge') {
+                      openWindow(uniqueId, "New Tab", <Browser />, getIconSrc("edge"));
+                  } else if (item.appName === 'File Explorer') {
+                      openWindow(uniqueId, "This PC", <FileExplorer initialPath="C:" onOpenFile={handleFileOpen} />, getIconSrc("this-pc"));
+                  } else if (item.appName === 'Terminal') {
+                      openWindow(uniqueId, "Terminal", <Terminal />, getIconSrc("terminal"));
+                  } 
+                  return;
+             }
+            
+            // Handle Generic File Types
+             const fileName = item.name || name;
+             
+             // SPECIAL CASE: Skills.txt -> Obsidian App
+             if (fileName === 'Skills.txt') {
+                 openWindow(`obsidian-skills`, "Obsidian - Skills Vault", <Obsidian />, getIconSrc("file-text")); 
+                 return;
+             }
+ 
+             // Markdown / Text Files
+             if (item.fileType === 'markdown' || fileName.endsWith('.md')) {
+                 // Check if it's the specific "About Me" legacy content
+                 if (item.content === "about-me") {
+                     // Open About Me in a clean window (Native App style, no fake VS Code)
+                     openWindow(`aboutme`, "About Me", <AboutMe />, getIconSrc("user-circle")); 
+                 } else {
+                     // Generic markdown
+                     openWindow(`notepad-${fileName}`, `${fileName} - Notepad`, 
+                         <div className="flex flex-col h-full bg-white text-black font-mono text-sm">
+                             <div className="flex items-center gap-4 px-2 py-1 border-b text-xs text-gray-600 bg-gray-50">
+                                 <span>File</span><span>Edit</span><span>Format</span><span>View</span><span>Help</span>
+                             </div>
+                             <textarea 
+                                readOnly 
+                                className="flex-1 w-full h-full p-4 resize-none outline-none border-none" 
+                                value={item.content} 
+                             />
+                         </div>, 
+                         getIconSrc("file-text")
+                     );
+                 }
+             } else if (item.fileType === 'text' || fileName.endsWith('.txt')) {
+                 // Notepad Fallback
+                 openWindow(`notepad-${fileName}`, `${fileName} - Notepad`, 
+                    <div className="flex flex-col h-full bg-white text-black font-mono text-sm">
+                         <div className="flex items-center gap-4 px-2 py-1 border-b text-xs text-gray-600 bg-gray-50">
+                             <span>File</span><span>Edit</span><span>Format</span><span>View</span><span>Help</span>
+                         </div>
+                         <textarea 
+                            readOnly 
+                            className="flex-1 w-full h-full p-4 resize-none outline-none border-none" 
+                            value={item.content} 
+                         />
+                    </div>, 
+                    getIconSrc("file-text")
+                 );
+             } else if (item.fileType === 'pdf' || fileName.endsWith('.pdf')) {
+                 openWindow("resume-viewer", fileName, <Resume />, getIconSrc("file-pdf"));
+             } else if (item.fileType === 'image') {
+                 openWindow(
+                    `img-${name}`, 
+                    name, 
+                    <div className="flex items-center justify-center h-full bg-[#222]">
+                        <img src={item.content} alt={name} className="max-w-full max-h-full object-contain" />
+                    </div>, 
+                    getIconSrc("photos")
+                );
+             } else if (item.appName === 'File Explorer') {
+                 openWindow(`explorer-${Date.now()}`, "This PC", <FileExplorer initialPath="C:" onOpenFile={handleFileOpen} />, getIconSrc("this-pc"));
+             }
         }
     };
 
-    const desktopIcons = [
-        { name: "Projects", icon: projectIcon },
-        { name: "Skills", icon: skillsIcon },
-        { name: "About Me", icon: aboutMeIcon },
-        { name: "Certificates", icon: certificateIcon },
-        { name: "Blogs", icon: blogsIcon },
-        { name: "Resume", icon: resumeIcon },
+    // Helper to launch pinned items that need specific content from VFS
+    const handlePinnedLaunch = (appName) => {
+        // We know where these live in Documents now.
+        const docs = getDirContent("C:/Users/Kushal/Documents");
+        if (!docs) return;
+
+        if (appName === "Skills.txt") {
+            const item = docs["Skills.txt"];
+            if (item) handleFileOpen("Skills.txt", item);
+        } else if (appName === "Projects") {
+             // Pass explicit path so it doesn't look in Desktop
+             handleFileOpen("Projects", { type: "folder", path: "C:/Users/Kushal/Documents/Projects" }); 
+        } else if (appName === "Certificates") {
+             handleFileOpen("Certificates", { type: "folder", path: "C:/Users/Kushal/Documents/Certificates" });
+        } else if (appName === "Resume.pdf") {
+            const item = docs["Resume.pdf"];
+            if (item) handleFileOpen("Resume.pdf", item);
+        }
+    };
+
+    // Generate start menu items
+    // First, standard desktop items (minus the ones we want specific behavior for if needed, or just include all)
+    const desktopApps = Object.entries(desktopContent).map(([name, item]) => ({
+        name: name.replace(/\.(md|pdf|txt|lnk|exe)$/, ""),
+        icon: item.icon, 
+        action: () => handleFileOpen(name, item)
+    }));
+
+
+
+    // Specific requested items for Start Menu
+    const specificStartApps = [
+        { name: "Projects", icon: getIconSrc("folder"), action: () => handlePinnedLaunch("Projects") },
+        { name: "Skills.txt", icon: getIconSrc("file-text"), action: () => handlePinnedLaunch("Skills.txt") },
+        { name: "Certificates", icon: getIconSrc("folder"), action: () => handlePinnedLaunch("Certificates") },
+        { name: "Resume.pdf", icon: getIconSrc("file-pdf"), action: () => handlePinnedLaunch("Resume.pdf") },
+        // Custom Styled Socials
+        { 
+            name: "GitHub", 
+            icon: <FaGithub />, 
+            bgColor: "bg-[#24292e]", 
+            action: () => handleFileOpen("GitHub", { target: "https://github.com/mrkushalsm", type: "shortcut" }) 
+        },
+        { 
+            name: "LinkedIn", 
+            icon: <FaLinkedin />, 
+            bgColor: "bg-[#0077b5]", 
+            action: () => handleFileOpen("LinkedIn", { target: "https://www.linkedin.com/in/mrkushalsm/", type: "shortcut" }) 
+        }
     ];
-    
-    // Apps that should appear in the Start Menu but not on desktop
-    const startMenuApps = [
-        ...desktopIcons,
-        { name: "Terminal", icon: terminalIcon }
+
+    // Combine for Start Menu, filtering out the manual ones from the auto-generated list
+    const allStartApps = [
+        ...specificStartApps, 
+        ...desktopApps
+            .filter(app => !["Projects", "Skills", "Certificates", "Resume", "GitHub", "LinkedIn"].includes(app.name))
+            .map(app => ({...app, icon: getIconSrc(app.icon)})) // Resolve icon strings to paths for Start Menu
     ];
 
     return (
-        <div className="relative w-full h-screen overflow-hidden bg-cover bg-center"
-            style={{
-                backgroundImage: `url(${wallpaper})`,
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: 0
-            }}
+        <div className="relative w-full h-screen overflow-hidden bg-cover bg-center select-none"
+            style={{ backgroundImage: `url(${wallpaper})` }}
         >
-            {/* Desktop Icons - Higher z-index to stay above windows */}
-            <div className="absolute top-10 left-10 flex flex-col gap-6 z-40">
-                {desktopIcons.map((icon) => (
-                    <div
-                        key={icon.name}
-                        className="flex flex-col cursor-pointer text-white justify-center items-center p-2 hover:bg-gray-700/50 rounded transition-colors"
-                        onClick={() => openFolder(icon.name)}
-                    >
-                        <div className="p-2">
-                            <img src={icon.icon} alt={icon.name} height="32px" width="32px" className="pointer-events-none" />
-                        </div>
-                        <span className="text-sm text-white/90 text-shadow">{icon.name}</span>
-                    </div>
+            {/* Desktop Icons Grid */}
+            <div className="absolute top-0 left-0 bottom-12 right-0 p-2 flex flex-col flex-wrap content-start gap-2 z-0">
+                {Object.entries(desktopContent).map(([name, item]) => (
+                    <FileIcon 
+                        key={name} 
+                        name={name} 
+                        item={item} 
+                        onOpen={handleFileOpen}
+                        // isSelected={...}
+                    />
                 ))}
             </div>
 
-            {/* Windows - Container with pointer-events-none to allow clicks through to desktop */}
-            <div className="absolute inset-0 pointer-events-none">
-                {openWindows.map((folder) => (
-                    <div 
-                        key={folder} 
-                        className="pointer-events-auto"
-                        style={{
-                            display: windowVisibility[folder] === false ? 'none' : 'block',
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            overflow: 'hidden',
-                            pointerEvents: 'auto'
-                        }}
-                        onClick={(e) => {
-                            // Stop propagation to prevent clicks from going through the window
-                            e.stopPropagation();
-                            setActiveWindow(folder);
-                        }}
-                    >
+            {/* Windows Area */}
+            <div className="absolute inset-0 pointer-events-none z-10">
+                {windows.map((win) => (
+                   <div 
+                        key={win.id}
+                        className={`absolute inset-0 ${win.isMinimized ? 'hidden' : 'block'}`}
+                        style={{ zIndex: win.zIndex }}
+                   >
                         <WindowCard
-                            ref={windowRefs.current[folder]}
-                            title={folder}
-                            onClose={() => closeFolder(folder)}
-                            isActive={activeWindow === folder}
-                            isVisible={windowVisibility[folder] !== false}
-                            onMinimize={() => toggleMinimizeWindow(folder)}
-                            onClick={() => setActiveWindow(folder)}
+                            id={win.id}
+                            title={win.title}
+                            icon={win.icon} // Pass icon to window card
+                            isActive={activeWindowId === win.id}
+                            zIndex={win.zIndex}
+                            onClose={() => closeWindow(win.id)}
+                            onMinimize={() => toggleMinimize(win.id)}
+                            onClick={() => focusWindow(win.id)}
                         >
-                            {componentMap[folder] || `Content for ${folder} goes here.`}
+                            {win.component}
                         </WindowCard>
-                    </div>
+                   </div>
                 ))}
             </div>
 
             {/* Taskbar */}
             <Taskbar
-                openWindows={openWindows}
-                activeWindow={activeWindow}
-                setActiveWindow={setActiveWindow}
-                desktopIcons={startMenuApps}
-                windowVisibility={windowVisibility}
-                onToggleMinimize={toggleMinimizeWindow}
-                onOpenApp={openFolder}
+                windows={windows}
+                activeWindowId={activeWindowId}
+                onToggleMinimize={toggleMinimize}
+                onFocus={focusWindow}
+                startApps={allStartApps}
+                // pinnedApps={realPinnedApps} // REMOVED as per user request (not taskbar)
             />
         </div>
     );

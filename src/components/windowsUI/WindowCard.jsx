@@ -1,214 +1,174 @@
-import React, { forwardRef, useState, useRef, useEffect } from "react";
+import React, { forwardRef, useState, useEffect } from "react";
 import Draggable from "react-draggable";
+import { FaWindowMinimize, FaWindowMaximize, FaTimes } from 'react-icons/fa';
 
 const WindowCard = forwardRef(({ 
     title, 
+    icon,
     onClose, 
     children, 
     isActive, 
-    isVisible = true, 
+    zIndex,
     onMinimize,
     onClick 
-}, ref) => {
+}, externalRef) => {
+    const internalRef = React.useRef(null);
+    // Use external ref if provided, otherwise internal
+    const ref = externalRef || internalRef; 
+    
     const [isMaximized, setIsMaximized] = useState(false);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [position, setPosition] = useState({ x: 50, y: 50 });
+    const [lastPosition, setLastPosition] = useState({ x: 50, y: 50 });
     
-    // Desktop and mobile size presets
-    const desktopSize = React.useMemo(() => ({ width: '20vw', height: '50vh' }), []);
-    const mobileSize = React.useMemo(() => ({ width: '95vw', height: '70vh' }), []);
-    
-    const [size, setSize] = useState(isMobile ? mobileSize : desktopSize);
-    const originalPosition = useRef({ x: 0, y: 0 });
-    const originalSize = useRef(isMobile ? { ...mobileSize } : { ...desktopSize });
-    const isInitialMount = useRef(true);
+    // Default size
+    const [size, setSize] = useState({ width: '60vw', height: '60vh' });
 
-    // Handle window resize and mobile/desktop detection
-    useEffect(() => {
-        const handleResize = () => {
-            const mobileCheck = window.innerWidth < 768;
-            if (mobileCheck !== isMobile) {
-                setIsMobile(mobileCheck);
-                // Update size based on new viewport
-                const newSize = mobileCheck ? mobileSize : desktopSize;
-                setSize(newSize);
-                originalSize.current = { ...newSize };
-            }
-            
-            // Update position
-            if (ref?.current) {
-                const windowEl = ref.current;
-                const maxX = window.innerWidth - windowEl.offsetWidth;
-                const maxY = window.innerHeight - windowEl.offsetHeight;
-                
-                let newX = (window.innerWidth - windowEl.offsetWidth) / 2;
-                let newY = (window.innerHeight - windowEl.offsetHeight) / 3;
-                
-                // Ensure window stays within viewport bounds
-                newX = Math.max(10, Math.min(newX, maxX - 10));
-                newY = Math.max(10, Math.min(newY, maxY - 10));
-                
-                setPosition({ x: newX, y: newY });
-                originalPosition.current = { x: newX, y: newY };
-            }
-        };
-        
-        if (isInitialMount.current) {
-            handleResize();
-            isInitialMount.current = false;
-        }
-        
-        // Add event listener for window resize
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, [ref, isMobile, mobileSize, desktopSize]);
+    const [isDragging, setIsDragging] = useState(false);
 
     const handleMaximize = () => {
-        if (isMaximized) {
-            // Restore to original position and size
-            setPosition(originalPosition.current);
-            setSize(originalSize.current);
-        } else {
-            // Save current position and size before maximizing
-            if (ref?.current) {
-                const rect = ref.current.getBoundingClientRect();
-                originalPosition.current = { x: rect.left, y: rect.top };
-                originalSize.current = { width: `${rect.width}px`, height: `${rect.height}px` };
-                
-                // Set to fullscreen
+        if (!isDragging) { // Prevent maximize trigger after drag release if slight movement
+             if (!isMaximized) {
+                setLastPosition(position);
                 setPosition({ x: 0, y: 0 });
-                setSize({ 
-                    width: '100vw', 
-                    height: '100vh',
-                    margin: 0,
-                    borderRadius: 0
-                });
+            } else {
+                setPosition(lastPosition);
             }
+            setIsMaximized(!isMaximized);
         }
-        setIsMaximized(!isMaximized);
     };
 
-    const handleMinimize = () => onMinimize?.();
+    const handleMinimize = (e) => {
+        e.stopPropagation();
+        onMinimize?.();
+    };
+    
+    const handleDragStart = () => {
+        setIsDragging(true);
+        if (onClick) onClick(); // Focus on drag start
+    };
 
     const handleDrag = (e, data) => {
-        if (!isMaximized && ref?.current) {
-            const windowEl = ref.current;
-            const maxX = window.innerWidth - windowEl.offsetWidth;
-            const maxY = window.innerHeight - windowEl.offsetHeight;
-            
-            // Constrain position to viewport bounds with 10px padding
-            const newX = Math.max(10, Math.min(data.x, maxX - 10));
-            const newY = Math.max(10, Math.min(data.y, maxY - 10));
-            
-            setPosition({ x: newX, y: newY });
-        }
+        setPosition({ x: data.x, y: data.y });
     };
 
-    if (!isVisible) return null;
+    const handleDragStop = () => {
+        setIsDragging(false);
+    };
+
+    const getIconPath = (iconName) => {
+       if (!iconName) return "/assets/icons/win10/file-text.ico";
+       if (iconName.startsWith('/') || iconName.startsWith('http')) return iconName;
+       return `/assets/icons/win10/${iconName}.ico`;
+    };
 
     return (
         <Draggable 
             nodeRef={ref} 
             handle=".drag-handle"
-            bounds={isMaximized ? '' : 'parent'}
-            cancel=".window-control"
-            position={isMaximized ? { x: 0, y: 0 } : position}
+            bounds="parent"
+            disabled={isMaximized}
+            position={position}
+            onStart={handleDragStart}
             onDrag={handleDrag}
+            onStop={handleDragStop}
         >
             <div
                 ref={ref}
-                className={`flex flex-col ${isActive ? 'bg-white' : 'bg-white/90'} shadow-lg border rounded-lg overflow-hidden resize
-                ${isActive ? "border-blue-400/30 shadow-lg" : "border-gray-300/50 opacity-90"}
-                ${isMaximized ? "!rounded-none" : ""}
-                touch-none md:touch-auto
-                transition-all duration-200 ease-out
-                will-change-transform`}
+                className={`absolute flex flex-col bg-[#1e1e1e] shadow-2xl rounded-md overflow-hidden border border-[#333]
+                ${isActive ? "shadow-[0_0_20px_rgba(0,0,0,0.5)] border-[#0078d7]" : "opacity-95 border-[#333]"}
+                transition-all duration-200 pointer-events-auto ${isMaximized ? 'inset-0 w-full h-full rounded-none' : ''}`}
                 style={{
-                    position: isMaximized ? 'fixed' : 'absolute',
-                    width: isMaximized ? '100%' : size.width,
-                    height: isMaximized ? '100%' : `calc(${size.height} - ${window.innerWidth < 768 ? '10%' : '0%'})`,
-                    left: isMaximized ? 0 : 'auto',
-                    top: isMaximized ? 0 : 'auto',
-                    zIndex: isActive ? (isMaximized ? 1000 : 50) : 40,
-                    maxWidth: isMaximized ? '100%' : (isMobile ? '95vw' : '90vw'),
-                    maxHeight: isMaximized ? '100%' : (isMobile ? '80vh' : '85vh'),
-                    touchAction: 'none',
-                    ...(isMaximized ? size : {})
+                    width: isMaximized ? '100% ' : size.width,
+                    height: isMaximized ? 'calc(100% - 2.5rem)' : size.height, // 2.5rem = h-10 (40px)
+                    top: isMaximized ? 0 : position.y, // Force top 0
+                    left: isMaximized ? 0 : position.x, // Force left 0
+                    zIndex: zIndex,
+                    transition: isMaximized ? 'none' : 'width 0.2s, height 0.2s, opacity 0.2s'
                 }}
+                onMouseDown={onClick}
             >
-                <div className="flex flex-col h-full">
-                    {/* Windows 10 Style Title Bar */}
-                    <div 
-                        className="drag-handle flex items-center justify-between h-9 px-0 cursor-default select-none bg-zinc-900/95 backdrop-blur-sm"
-                        style={{
-                            borderTopLeftRadius: isMaximized ? '0' : '0.5rem',
-                            borderTopRightRadius: isMaximized ? '0' : '0.5rem',
-                            borderBottom: '1px solid rgba(63, 63, 70, 0.5)'
-                        }}
-                        onMouseDown={onClick}
-                    >
-                        {/* Left side with icon and title */}
-                        <div className="flex items-center h-full pl-3 pr-2">
-                            <span className="text-gray-200 text-sm font-normal">{title}</span>
-                        </div>
-
-                        {/* Window controls */}
-                        <div className="flex items-stretch h-full">
-                            <button 
-                                onClick={handleMinimize}
-                                className="window-control w-12 h-full flex items-center justify-center hover:bg-[#404040] transition-colors duration-100 group"
-                                aria-label="Minimize"
-                            >
-                                <div className="w-4 h-4 flex items-center justify-center">
-                                    <div className="w-2.5 h-px bg-gray-300 group-hover:bg-white" />
-                                </div>
-                            </button>
-                            
-                            <button 
-                                onClick={handleMaximize}
-                                className="window-control w-12 h-full flex items-center justify-center hover:bg-[#404040] transition-colors duration-100 group"
-                                aria-label={isMaximized ? "Restore" : "Maximize"}
-                            >
-                                <div className="w-4 h-4 flex items-center justify-center">
-                                    {isMaximized ? (
-                                        <div className="relative w-3 h-3">
-                                            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-gray-300 group-hover:border-white" />
-                                            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-gray-300 group-hover:border-white" />
-                                            <div className="absolute top-0.5 left-0.5 w-2 h-2 border-t border-l border-gray-300 group-hover:border-white" />
-                                        </div>
-                                    ) : (
-                                        <div className="w-2.5 h-2.5 border border-gray-300 group-hover:border-white" />
-                                    )}
-                                </div>
-                            </button>
-                            
-                            <button 
-                                onClick={onClose}
-                                className="window-control w-12 h-full flex items-center justify-center hover:bg-red-600 transition-colors duration-100 group"
-                                aria-label="Close"
-                            >
-                                <div className="w-4 h-4 relative">
-                                    <div className="absolute top-1/2 left-1/2 w-2.5 h-px bg-gray-300 group-hover:bg-white transform -translate-x-1/2 -translate-y-1/2 rotate-45" />
-                                    <div className="absolute top-1/2 left-1/2 w-2.5 h-px bg-gray-300 group-hover:bg-white transform -translate-x-1/2 -translate-y-1/2 -rotate-45" />
-                                </div>
-                            </button>
-                        </div>
+                {/* Windows 10 Title Bar */}
+                {/* Reverting to Clean Dark Theme matching valid Win10 Dark Mode */}
+                <div className={`drag-handle h-8 flex items-center justify-between select-none ${isActive ? 'bg-[#202020]' : 'bg-[#2d2d2d]'} text-white`}>
+                    <div className="flex items-center px-3 gap-3 flex-1 h-full overflow-hidden">
+                        {icon && (
+                             <img src={getIconPath(icon)} alt="" className="w-4 h-4" draggable={false}/>
+                        )}
+                        <span className="text-xs font-normal tracking-wide truncate opacity-100">{title}</span>
                     </div>
 
-                    {/* Window Content */}
-                    <div 
-                        className="flex-1 overflow-auto text-gray-700"
-                        style={{
-                            WebkitOverflowScrolling: 'touch',
-                            overscrollBehavior: 'contain',
-                        }}
-                    >
-                        {children}
+                    {/* Win10 Native Control Buttons */}
+                    <div className="flex h-full no-drag">
+                        <button 
+                            onClick={handleMinimize}
+                            title="Minimize"
+                            className="w-12 h-full flex items-center justify-center hover:bg-[#3facfa]/10 active:bg-[#3facfa]/20 transition-colors group"
+                        >
+                            <svg className="w-[10px]" viewBox="0 0 10 1">
+                                <rect width="10" height="1" fill="white" />
+                            </svg>
+                        </button>
+                        
+                        <button 
+                            onClick={handleMaximize}
+                            title={isMaximized ? "Restore Down" : "Maximize"}
+                            className="w-12 h-full flex items-center justify-center hover:bg-[#3facfa]/10 active:bg-[#3facfa]/20 transition-colors group"
+                        >
+                           {isMaximized ? (
+                                // Restore Icon (Two overlapping squares)
+                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" strokeWidth="1">
+                                    <path d="M2.5 2.5H9.5V9.5H2.5V2.5Z" /> {/* Front */}
+                                    <path d="M0.5 0.5H7.5V7.5H0.5V0.5Z" strokeOpacity="1" /> {/* Back */}
+                                    {/* Clean Path: M2.5 2.5h7v7h-7z M0.5 0.5h7v7h-7z but cut out? No, simple overlap is fine usually */}
+                                    <mask id="cut">
+                                        <rect width="10" height="10" fill="white"/>
+                                        <rect x="2" y="2" width="8" height="8" fill="black"/>
+                                    </mask>
+                                    <path d="M0.5 2.5V0.5H7.5V7.5H5.5" stroke="white"/>
+                                    <rect x="2.5" y="2.5" width="7" height="7" stroke="white" fill="transparent"/>
+                                </svg>
+                           ) : (
+                                // Maximize Icon (One square)
+                                <div className="w-[10px] h-[10px] border border-white bg-transparent"></div>
+                           )}
+                        </button>
+                        
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); onClose(); }}
+                            title="Close"
+                            className="w-12 h-full flex items-center justify-center hover:bg-[#e81123] active:bg-[#ca0b1b] transition-colors group"
+                        >
+                            <svg className="w-[10px] h-[10px]" viewBox="0 0 10 10" fill="none" stroke="white" strokeWidth="1">
+                                <path d="M0.5 0.5L9.5 9.5M9.5 0.5L0.5 9.5" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
+
+                {/* Content */}
+                <div className="flex-1 overflow-auto bg-[#191919] relative text-gray-200 cursor-auto p-1">
+                    {children}
+                </div>
+                
+                 {/* Focus Overlay: Sits ON TOP of everything when inactive OR dragging */}
+                 {/* This guarantees capture of clicks to focus, and blocks heavy iframe events during drag */}
+                 {(!isActive || isDragging) && (
+                    <div 
+                        className="absolute inset-x-0 bottom-0 top-8 z-[9999] bg-transparent"
+                        style={{ cursor: 'default' }}
+                        onMouseDown={(e) => {
+                            // Stop propagation to prevent Draggable from getting confused if clicked here
+                            // But mostly to ensure we trigger the focus explicit action
+                            e.stopPropagation(); 
+                            if (onClick) onClick();
+                        }}
+                    />
+                )}
             </div>
         </Draggable>
     );
 });
+
+WindowCard.displayName = "WindowCard";
 
 export default WindowCard;
