@@ -24,6 +24,9 @@ const getIconPath = (iconName) => {
         "file-text": "/assets/icons/win10/file-text.ico",
         "file-pdf": "/assets/icons/win10/file-pdf.ico",
         "file-image": "/assets/icons/win10/file-image.ico",
+        "video-file": "/assets/icons/win10/video-file.ico",
+        "music-file": "/assets/icons/win10/music-file.ico",
+        "exe-file": "/assets/icons/win10/exe-file.ico",
         
         // Apps
         "edge": "/assets/icons/win10/edge.png",
@@ -57,6 +60,8 @@ const getIconPath = (iconName) => {
     if (iconName === 'file-image') return "/assets/icons/win10/file-image.ico";
     if (iconName === 'file-pdf') return "/assets/icons/win10/file-pdf.ico";
     if (iconName === 'video' || iconName === 'file-video') return "/assets/icons/win10/video-file.ico";
+    if (iconName === 'music' || iconName === 'audio' || iconName === 'file-audio') return "/assets/icons/win10/music-file.ico";
+    if (iconName === 'exe' || iconName === 'application' || iconName === 'binary') return "/assets/icons/win10/exe-file.ico";
     
     return "/assets/icons/win10/file-text.ico";
 

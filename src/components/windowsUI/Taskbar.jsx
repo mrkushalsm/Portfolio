@@ -8,7 +8,8 @@ const Taskbar = ({
     onToggleMinimize, 
     onFocus,
     startApps = [],
-    pinnedApps = [] 
+    pinnedApps = [],
+    onLaunchItem // NEW prop
 }) => {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [isStartOpen, setIsStartOpen] = useState(false);
@@ -32,6 +33,7 @@ const Taskbar = ({
                 isOpen={isStartOpen} 
                 onClose={() => setIsStartOpen(false)} 
                 apps={startApps} 
+                onLaunchItem={onLaunchItem}
             />
             
             <div className="absolute bottom-0 w-full h-10 bg-[#101010cc] backdrop-blur-md flex items-center justify-between z-[10000] select-none text-white border-t border-[#333]">
@@ -113,13 +115,7 @@ const Taskbar = ({
                         <span className="text-[10px]">{formatDate(currentTime)}</span>
                     </div>
 
-                    {/* Notifications */}
-                    <div className="h-full w-10 flex items-center justify-center hover:bg-white/10 cursor-pointer border-l border-gray-600/30 ml-1">
-                       {/* Action Center Icon */}
-                       <svg width="14" height="14" viewBox="0 0 20 20" fill="white">
-                           <path d="M18 2h-16c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-12c0-1.1-.9-2-2-2zm-16 14v-12h16l-8 5-8-5v12z"/>
-                       </svg>
-                    </div>
+
                     
                     {/* Show Desktop Line */}
                     <div className="w-1.5 h-full border-l border-gray-500/50 cursor-pointer hover:bg-white/20 ml-1"></div>

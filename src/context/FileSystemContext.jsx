@@ -29,7 +29,6 @@ const INITIAL_FS = {
                                     // Clean Desktop
                                     "About Me": { type: "file", fileType: "markdown", content: "about-me", icon: "user-circle" },
                                     "This PC": { type: "file", fileType: "app", appName: "File Explorer", icon: "this-pc" },
-                                    "Microsoft Edge": { type: "shortcut", target: "https://www.google.com/webhp?igu=1", icon: "edge" },
                                     "Terminal": { type: "file", fileType: "app", appName: "Terminal", icon: "terminal" },
                                     "GitHub": { type: "shortcut", target: "https://github.com/mrkushalsm", icon: "github" },
                                     "LinkedIn": { type: "shortcut", target: "https://www.linkedin.com/in/mrkushalsm/", icon: "linkedin" },
@@ -71,7 +70,7 @@ const INITIAL_FS = {
                                 type: "folder",
                                 icon: "downloads",
                                 children: {
-                                    "installer.exe": { type: "file", fileType: "binary", icon: "application" },
+                                    "installer.exe": { type: "file", fileType: "binary", icon: "exe-file" },
                                     "funny_cat.png": { 
                                         type: "file", 
                                         fileType: "image", 
@@ -96,14 +95,14 @@ const INITIAL_FS = {
                                 type: "folder",
                                 icon: "music",
                                 children: {
-                                    "Song.mp3": { type: "file", fileType: "audio", icon: "music" }
+                                    "Song.mp3": { type: "file", fileType: "audio", icon: "music-file" }
                                 }
                             },
                             "Videos": {
                                 type: "folder",
                                 icon: "videos",
                                 children: {
-                                    "Demo.mp4": { type: "file", fileType: "video", icon: "videos" }
+                                    "Demo.mp4": { type: "file", fileType: "video", icon: "video-file" }
                                 }
                             }
                         }

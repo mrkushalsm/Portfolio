@@ -13,28 +13,26 @@ const WindowCard = forwardRef(({
     onClick 
 }, externalRef) => {
     const internalRef = React.useRef(null);
-    // Use external ref if provided, otherwise internal
     const ref = externalRef || internalRef; 
     
+    // State
     const [isMaximized, setIsMaximized] = useState(false);
-    const [position, setPosition] = useState({ x: 50, y: 50 });
-    const [lastPosition, setLastPosition] = useState({ x: 50, y: 50 });
     
-    // Default size
-    const [size, setSize] = useState({ width: '60vw', height: '60vh' });
-
-    const [isDragging, setIsDragging] = useState(false);
+    // Window dimensions (Resizing)
+    const [size, setSize] = useState({ width: 800, height: 600 }); // Pixels for better control
+    
+    // Uncontrolled Mode: We only track last known position for restoring from Maximize
+    // We do NOT update state during drag (lag fix)
+    const lastPosRef = React.useRef({ x: 50, y: 50 }); 
+    const isDraggingRef = React.useRef(false); // Ref for immediate access without re-render
 
     const handleMaximize = () => {
-        if (!isDragging) { // Prevent maximize trigger after drag release if slight movement
-             if (!isMaximized) {
-                setLastPosition(position);
-                setPosition({ x: 0, y: 0 });
-            } else {
-                setPosition(lastPosition);
-            }
-            setIsMaximized(!isMaximized);
-        }
+        // Prevent accidental maximize trigger after drag release if slightly moved
+        if (isDraggingRef.current) return;
+
+        setIsMaximized(!isMaximized);
+        // Note: When restoring, we rely on the component re-mounting or key-change 
+        // to picking up defaultPosition from lastPosRef.current
     };
 
     const handleMinimize = (e) => {
@@ -43,16 +41,43 @@ const WindowCard = forwardRef(({
     };
     
     const handleDragStart = () => {
-        setIsDragging(true);
+        isDraggingRef.current = true;
         if (onClick) onClick(); // Focus on drag start
     };
 
-    const handleDrag = (e, data) => {
-        setPosition({ x: data.x, y: data.y });
+    const handleDragStop = (e, data) => {
+        isDraggingRef.current = false;
+        // Save position for restore
+        if (!isMaximized) {
+             lastPosRef.current = { x: data.x, y: data.y };
+        }
     };
+    
+    // Resizing Logic
+    const handleResizeMouseDown = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startWidth = size.width;
+        const startHeight = size.height;
 
-    const handleDragStop = () => {
-        setIsDragging(false);
+        const handleMouseMove = (mvEvent) => {
+            const newWidth = Math.max(300, startWidth + (mvEvent.clientX - startX));
+            const newHeight = Math.max(200, startHeight + (mvEvent.clientY - startY));
+            
+            // Direct state update (should be fast enough, or use requestAnimationFrame if stuck)
+            setSize({ width: newWidth, height: newHeight });
+        };
+
+        const handleMouseUp = () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
     };
 
     const getIconPath = (iconName) => {
@@ -67,10 +92,13 @@ const WindowCard = forwardRef(({
             handle=".drag-handle"
             bounds="parent"
             disabled={isMaximized}
-            position={position}
+            // KEY TRICK: Change key when maximized state changes to force re-init of position
+            key={isMaximized ? 'maximized' : 'restored'} 
+            defaultPosition={isMaximized ? {x: 0, y: 0} : lastPosRef.current}
+            // Remove 'position' prop -> Uncontrolled mode!
             onStart={handleDragStart}
-            onDrag={handleDrag}
             onStop={handleDragStop}
+            // No onDrag handler -> No 60fps re-renders!
         >
             <div
                 ref={ref}
@@ -78,17 +106,16 @@ const WindowCard = forwardRef(({
                 ${isActive ? "shadow-[0_0_20px_rgba(0,0,0,0.5)] border-[#0078d7]" : "opacity-95 border-[#333]"}
                 transition-all duration-200 pointer-events-auto ${isMaximized ? 'inset-0 w-full h-full rounded-none' : ''}`}
                 style={{
-                    width: isMaximized ? '100% ' : size.width,
-                    height: isMaximized ? 'calc(100% - 2.5rem)' : size.height, // 2.5rem = h-10 (40px)
-                    top: isMaximized ? 0 : position.y, // Force top 0
-                    left: isMaximized ? 0 : position.x, // Force left 0
+                    width: isMaximized ? '100%' : size.width,
+                    height: isMaximized ? 'calc(100% - 2.5rem)' : size.height, 
+                    // Remove top/left styles, let Draggable handle it via transform
                     zIndex: zIndex,
-                    transition: isMaximized ? 'none' : 'width 0.2s, height 0.2s, opacity 0.2s'
+                    // Remove generic transition to allow smooth drag, keep opacity fade
+                    transition: 'opacity 0.2s' 
                 }}
                 onMouseDown={onClick}
             >
                 {/* Windows 10 Title Bar */}
-                {/* Reverting to Clean Dark Theme matching valid Win10 Dark Mode */}
                 <div className={`drag-handle h-8 flex items-center justify-between select-none ${isActive ? 'bg-[#202020]' : 'bg-[#2d2d2d]'} text-white`}>
                     <div className="flex items-center px-3 gap-3 flex-1 h-full overflow-hidden">
                         {icon && (
@@ -97,50 +124,26 @@ const WindowCard = forwardRef(({
                         <span className="text-xs font-normal tracking-wide truncate opacity-100">{title}</span>
                     </div>
 
-                    {/* Win10 Native Control Buttons */}
+                    {/* Controls */}
                     <div className="flex h-full no-drag">
-                        <button 
-                            onClick={handleMinimize}
-                            title="Minimize"
-                            className="w-12 h-full flex items-center justify-center hover:bg-[#3facfa]/10 active:bg-[#3facfa]/20 transition-colors group"
-                        >
-                            <svg className="w-[10px]" viewBox="0 0 10 1">
-                                <rect width="10" height="1" fill="white" />
-                            </svg>
+                        <button onClick={handleMinimize} title="Minimize" className="w-12 h-full flex items-center justify-center hover:bg-[#3facfa]/10 transition-colors group">
+                           <svg className="w-[10px]" viewBox="0 0 10 1"><rect width="10" height="1" fill="white" /></svg>
                         </button>
                         
-                        <button 
-                            onClick={handleMaximize}
-                            title={isMaximized ? "Restore Down" : "Maximize"}
-                            className="w-12 h-full flex items-center justify-center hover:bg-[#3facfa]/10 active:bg-[#3facfa]/20 transition-colors group"
-                        >
+                        <button onClick={handleMaximize} title={isMaximized ? "Restore" : "Maximize"} className="w-12 h-full flex items-center justify-center hover:bg-[#3facfa]/10 transition-colors group">
                            {isMaximized ? (
-                                // Restore Icon (Two overlapping squares)
                                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" strokeWidth="1">
-                                    <path d="M2.5 2.5H9.5V9.5H2.5V2.5Z" /> {/* Front */}
-                                    <path d="M0.5 0.5H7.5V7.5H0.5V0.5Z" strokeOpacity="1" /> {/* Back */}
-                                    {/* Clean Path: M2.5 2.5h7v7h-7z M0.5 0.5h7v7h-7z but cut out? No, simple overlap is fine usually */}
-                                    <mask id="cut">
-                                        <rect width="10" height="10" fill="white"/>
-                                        <rect x="2" y="2" width="8" height="8" fill="black"/>
-                                    </mask>
+                                    <path d="M2.5 2.5H9.5V9.5H2.5V2.5Z" />
+                                    <path d="M0.5 0.5H7.5V7.5H0.5V0.5Z" strokeOpacity="1" /> 
                                     <path d="M0.5 2.5V0.5H7.5V7.5H5.5" stroke="white"/>
-                                    <rect x="2.5" y="2.5" width="7" height="7" stroke="white" fill="transparent"/>
                                 </svg>
                            ) : (
-                                // Maximize Icon (One square)
-                                <div className="w-[10px] h-[10px] border border-white bg-transparent"></div>
+                                <div className="w-[10px] h-[10px] border border-white"></div>
                            )}
                         </button>
                         
-                        <button 
-                            onClick={(e) => { e.stopPropagation(); onClose(); }}
-                            title="Close"
-                            className="w-12 h-full flex items-center justify-center hover:bg-[#e81123] active:bg-[#ca0b1b] transition-colors group"
-                        >
-                            <svg className="w-[10px] h-[10px]" viewBox="0 0 10 10" fill="none" stroke="white" strokeWidth="1">
-                                <path d="M0.5 0.5L9.5 9.5M9.5 0.5L0.5 9.5" />
-                            </svg>
+                        <button onClick={(e) => { e.stopPropagation(); onClose(); }} title="Close" className="w-12 h-full flex items-center justify-center hover:bg-[#e81123] active:bg-[#ca0b1b] transition-colors group">
+                             <svg className="w-[10px] h-[10px]" viewBox="0 0 10 10" fill="none" stroke="white" strokeWidth="1"><path d="M0.5 0.5L9.5 9.5M9.5 0.5L0.5 9.5" /></svg>
                         </button>
                     </div>
                 </div>
@@ -150,18 +153,25 @@ const WindowCard = forwardRef(({
                     {children}
                 </div>
                 
-                 {/* Focus Overlay: Sits ON TOP of everything when inactive OR dragging */}
-                 {/* This guarantees capture of clicks to focus, and blocks heavy iframe events during drag */}
-                 {(!isActive || isDragging) && (
+                {/* Resize Handle (Bottom-Right) */}
+                {!isMaximized && (
+                    <div 
+                        className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize z-50 flex items-end justify-end p-0.5"
+                        onMouseDown={handleResizeMouseDown}
+                    >
+                         {/* Visual indicator corner */}
+                         <svg viewBox="0 0 10 10" className="w-2 h-2 opacity-50">
+                             <path d="M10 0 L10 10 L0 10" fill="none" stroke="gray" strokeWidth="2"/>
+                         </svg>
+                    </div>
+                )}
+
+                 {/* Focus Overlay */}
+                 {(!isActive || isDraggingRef.current) && (
                     <div 
                         className="absolute inset-x-0 bottom-0 top-8 z-[9999] bg-transparent"
                         style={{ cursor: 'default' }}
-                        onMouseDown={(e) => {
-                            // Stop propagation to prevent Draggable from getting confused if clicked here
-                            // But mostly to ensure we trigger the focus explicit action
-                            e.stopPropagation(); 
-                            if (onClick) onClick();
-                        }}
+                        onMouseDown={(e) => { e.stopPropagation(); if (onClick) onClick(); }}
                     />
                 )}
             </div>

@@ -215,7 +215,8 @@ const DesktopEnv = () => {
                   } else if (item.appName === 'File Explorer') {
                       // If specific icon is provided (like imageres_1023), use it, otherwise default to this-pc or folder
                       const useIcon = item.icon === 'imageres_1023' ? "imageres_1023" : "this-pc";
-                      openWindow(uniqueId, "File Explorer", <FileExplorer initialPath="C:" onOpenFile={handleFileOpen} />, getIconSrc(useIcon));
+                      const startPath = item.initialPath || "C:";
+                      openWindow(uniqueId, "File Explorer", <FileExplorer initialPath={startPath} onOpenFile={handleFileOpen} />, getIconSrc(useIcon));
                   } else if (item.appName === 'Terminal') {
                       openWindow(uniqueId, "Terminal", <Terminal />, getIconSrc("terminal"));
                   } 
@@ -310,17 +311,6 @@ const DesktopEnv = () => {
         { name: "Skills.md", icon: getIconSrc("file-text"), action: () => handlePinnedLaunch("Skills.md") },
         { name: "Certificates", icon: getIconSrc("folder"), action: () => handlePinnedLaunch("Certificates") },
         { name: "Resume.pdf", icon: getIconSrc("file-pdf"), action: () => handlePinnedLaunch("Resume.pdf") },
-        // Custom Styled Socials
-        { 
-            name: "GitHub", 
-            icon: getIconSrc("github"),
-            action: () => handleFileOpen("GitHub", { target: "https://github.com/mrkushalsm", type: "shortcut" }) 
-        },
-        { 
-            name: "LinkedIn", 
-            icon: getIconSrc("linkedin"),
-            action: () => handleFileOpen("LinkedIn", { target: "https://www.linkedin.com/in/mrkushalsm/", type: "shortcut" }) 
-        }
     ];
 
     // Combine for Start Menu, filtering out the manual ones from the auto-generated list
@@ -379,6 +369,7 @@ const DesktopEnv = () => {
                 onToggleMinimize={toggleMinimize}
                 onFocus={focusWindow}
                 startApps={allStartApps}
+                onLaunchItem={handleFileOpen}
                 // pinnedApps={realPinnedApps} // REMOVED as per user request (not taskbar)
             />
         </div>
