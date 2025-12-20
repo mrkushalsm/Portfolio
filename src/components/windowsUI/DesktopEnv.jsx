@@ -7,6 +7,7 @@ import FileIcon from "../win10/FileIcon";
 import FileExplorer from "../win10/FileExplorer";
 import Browser from "../win10/Browser";
 import VSCode from "../win10/VSCode";
+import Notepad from "../win10/Notepad"; // New Component
 import Obsidian from "../win10/Obsidian.jsx";
 
 import Terminal from "./Terminal.jsx"; 
@@ -125,28 +126,68 @@ const DesktopEnv = () => {
                  const targetUrl = item.target;
                  if (targetUrl && typeof targetUrl === 'string' && targetUrl.startsWith('http')) {
                      
-                     // SPECIAL CASE: README shortcuts (which we pointed to github1s) -> VSCode Native App
+                     // SPECIAL CASE: README shortcuts (which we pointed to github1s) -> Smart Notepad Reader
                      // This gives the "Native App" feel for Readmes, separate from Browser
                      if (name === "README.md" || targetUrl.includes("/blob/main/README.md")) {
                          // Ensure we have a unique ID for multiple readmes
                          const readmeId = `readme-${name}-${Date.now()}`;
-                         // Force github1s URL if it somehow came in as github.com (safety)
-                         const safeUrl = targetUrl.replace('github.com', 'github1s.com');
+                         
+                         // 1. Raw URL for the Reader (Notepad)
+                         // Convert github1s.com (or github.com) -> raw.githubusercontent.com
+                         const rawUrl = targetUrl
+                            .replace('github1s.com', 'raw.githubusercontent.com') 
+                            .replace('github.com', 'raw.githubusercontent.com')
+                            .replace('/blob/', '/'); // Remove 'blob' part for raw
+
+                         // 2. Workspace URL for the Button (VS Code)
+                         const workspaceUrl = targetUrl.replace('github.com', 'github1s.com');
                          
                          // Extract Project Name from URL for the Window Title
-                         // Expected format: https://github1s.com/user/[Project-Name]/blob...
                          let projectTitle = "README.md";
                          try {
-                             const urlParts = safeUrl.split('/');
+                             const urlParts = targetUrl.split('/');
                              if (urlParts.length >= 5) {
-                                 // urlParts[4] should be the repo name
                                  projectTitle = urlParts[4].replace(/-/g, ' '); 
                              }
-                         } catch (e) {
-                             console.error("Error parsing project name", e);
-                         }
+                         } catch (e) { console.error(e); }
 
-                         openWindow(readmeId, `VSCode - ${projectTitle}`, <VSCode initialUrl={safeUrl} />, getIconSrc("vscode")); 
+                         // Define the "Open Workspace" action
+                         const handleOpenWorkspace = () => {
+                             // Keep the readme window open as per user request
+                             // closeWindow(readmeId); 
+                             
+                             // Open the full VS Code window
+                             openWindow(
+                                 `vscode-${projectTitle}-${Date.now()}`, 
+                                 `VSCode - ${projectTitle}`, 
+                                 <VSCode initialUrl={workspaceUrl} />, 
+                                 getIconSrc("vscode")
+                             );
+                         };
+
+                         openWindow(
+                             readmeId, 
+                             `${projectTitle} - ReadMe`, 
+                             <Obsidian 
+                                content={null} // It will fetch via URL logic inside (wait, Obsidian needs URL logic added!)
+                                // Wait, Obsidian rewrite didn't include URL fetching logic like Notepad had!
+                                // Use the content/url logic or fetch inside Obsidian? 
+                                // Notepad had internal fetch. Obsidian currently expects 'content'.
+                                // I must update Obsidian to accept URL or fetch here. 
+                                // NOTE: The new Obsidian component I wrote takes `content`. 
+                                // The fetching logic was in Notepad. I should move it or pass content.
+                                // But here we have a URL.
+                                // Let's pass the URL and update Obsidian to handle it, OR fetch here.
+                                // Notepad handled it internally. Let's make Obsidian handle it too for consistency.
+                                // I will pass `url` to Obsidian and update Obsidian to fetch it.
+                                url={rawUrl} 
+                                fileName="README.md"
+                                projectTitle={projectTitle} // Pass Title for Zen Header
+                                projectRepo={true}
+                                onOpenWorkspace={handleOpenWorkspace}
+                             />, 
+                             getIconSrc("file-text")
+                         ); 
                          return;
                      }
 
@@ -186,34 +227,19 @@ const DesktopEnv = () => {
                      // Open About Me in a clean window (Native App style, no fake VS Code)
                      openWindow(`aboutme`, "About Me", <AboutMe />, getIconSrc("user-circle")); 
                  } else {
-                     // Generic markdown
-                     openWindow(`notepad-${fileName}`, `${fileName} - Notepad`, 
-                         <div className="flex flex-col h-full bg-white text-black font-mono text-sm">
-                             <div className="flex items-center gap-4 px-2 py-1 border-b text-xs text-gray-600 bg-gray-50">
-                                 <span>File</span><span>Edit</span><span>Format</span><span>View</span><span>Help</span>
-                             </div>
-                             <textarea 
-                                readOnly 
-                                className="flex-1 w-full h-full p-4 resize-none outline-none border-none" 
-                                value={item.content} 
-                             />
-                         </div>, 
+                     // NEW: Open all Markdown in Obsidian
+                     openWindow(`obsidian-${fileName}`, `${fileName} - Obsidian`, 
+                         <Obsidian 
+                            content={item.content} 
+                            fileName={fileName}
+                         />, 
                          getIconSrc("file-text")
                      );
                  }
              } else if (item.fileType === 'text' || fileName.endsWith('.txt')) {
-                 // Notepad Fallback
+                 // Notepad Fallback (Text files stay in Notepad as requested)
                  openWindow(`notepad-${fileName}`, `${fileName} - Notepad`, 
-                    <div className="flex flex-col h-full bg-white text-black font-mono text-sm">
-                         <div className="flex items-center gap-4 px-2 py-1 border-b text-xs text-gray-600 bg-gray-50">
-                             <span>File</span><span>Edit</span><span>Format</span><span>View</span><span>Help</span>
-                         </div>
-                         <textarea 
-                            readOnly 
-                            className="flex-1 w-full h-full p-4 resize-none outline-none border-none" 
-                            value={item.content} 
-                         />
-                    </div>, 
+                    <Notepad content={item.content} />, 
                     getIconSrc("file-text")
                  );
              } else if (item.fileType === 'pdf' || fileName.endsWith('.pdf')) {

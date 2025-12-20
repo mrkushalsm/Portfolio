@@ -40,14 +40,16 @@ const INITIAL_FS = {
                                 children: {
                                     "Resume.pdf": { type: "file", fileType: "pdf", content: "/assets/resume.pdf", icon: "file-pdf" },
                                     "Projects": { type: "folder", icon: "folder", children: {} }, 
-                                    "Skills.txt": { 
+                                    "Projects": { type: "folder", icon: "folder", children: {} }, 
+                                    "Skills.md": { 
                                         type: "file", 
-                                        fileType: "text", 
+                                        fileType: "markdown", 
                                         content: Object.entries(skillsData).map(([category, skills]) => 
-                                            `${category}:\n${skills.map(s => `- ${s.name} (${s.proficiency})`).join('\n')}`
-                                        ).join('\n\n'), 
+                                            `# ${category}\n${skills.map(s => `![${s.name}](${s.icon}) **${s.name}**\n*${s.proficiency}* - ${s.description}`).join('\n\n')}`
+                                        ).join('\n\n---\n\n'), 
                                         icon: "file-text" 
                                     },
+                                    "Certificates": { type: "folder", icon: "folder", children: {} },
                                     "Certificates": { type: "folder", icon: "folder", children: {} }, 
                                     "Project_Ideas.txt": { type: "file", fileType: "text", content: "1. Build a cool OS in React\n2. Make it pixel perfect", icon: "file-text" },
                                     "Notes.md": { type: "file", fileType: "markdown", content: "# Daily Notes\n- Drink water\n- Code more", icon: "file-text" }

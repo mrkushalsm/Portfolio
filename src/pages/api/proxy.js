@@ -29,7 +29,8 @@ export default async function handler(req, res) {
         res.setHeader("Content-Security-Policy", "frame-ancestors *;");
 
         // 2. HTML Injection (The "Deep Proxy" Logic)
-        if (contentType && contentType.includes("text/html")) {
+        // Skip injection if ?raw=true is passed
+        if (contentType && contentType.includes("text/html") && req.query.raw !== 'true') {
             // We inject a script that monkey-patches the browser environment
             // to force all navigation and API calls back through this proxy.
             const proxyScript = `
