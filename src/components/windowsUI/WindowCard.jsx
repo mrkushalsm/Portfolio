@@ -133,9 +133,8 @@ const WindowCard = forwardRef(({
                         <button onClick={handleMaximize} title={isMaximized ? "Restore" : "Maximize"} className="w-12 h-full flex items-center justify-center hover:bg-[#3facfa]/10 transition-colors group">
                            {isMaximized ? (
                                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" strokeWidth="1">
-                                    <path d="M2.5 2.5H9.5V9.5H2.5V2.5Z" />
-                                    <path d="M0.5 0.5H7.5V7.5H0.5V0.5Z" strokeOpacity="1" /> 
-                                    <path d="M0.5 2.5V0.5H7.5V7.5H5.5" stroke="white"/>
+                                    <path d="M2.5 2.5V0.5H9.5V7.5H7.5" shapeRendering="crispEdges" />
+                                    <rect x="0.5" y="2.5" width="7" height="7" shapeRendering="crispEdges" />
                                 </svg>
                            ) : (
                                 <div className="w-[10px] h-[10px] border border-white"></div>
