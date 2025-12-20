@@ -72,7 +72,7 @@ const FileIcon = ({ name, item, onOpen, isSelected, onSelect }) => {
     return (
         <div 
             className={`
-                flex flex-col items-center justify-start w-24 p-2 rounded-sm cursor-default border border-transparent
+                flex flex-col items-center justify-start w-24 p-2 rounded-sm cursor-pointer border border-transparent
                 ${isSelected ? 'bg-blue-500/40 border-blue-500/50' : 'hover:bg-white/10'}
                 transition-all duration-75 group
             `}

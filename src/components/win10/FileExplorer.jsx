@@ -76,9 +76,9 @@ const FileExplorer = ({ initialPath = "C:/Users/Kushal/Desktop", onClose, onOpen
             {/* Ribbon / Toolbar (Simplified) */}
             <div className="flex items-center gap-2 p-2 border-b border-[#333] bg-[#202020]">
                 <div className="flex gap-1 text-gray-400">
-                    <button onClick={goBack} disabled={historyIndex === 0} className="p-1 hover:bg-[#333] rounded disabled:opacity-30"><FaArrowLeft /></button>
-                    <button onClick={goForward} disabled={historyIndex === history.length - 1} className="p-1 hover:bg-[#333] rounded disabled:opacity-30"><FaArrowRight /></button>
-                    <button onClick={goUp} className="p-1 hover:bg-[#333] rounded"><FaArrowUp /></button>
+                    <button onClick={goBack} disabled={historyIndex === 0} className="p-1 hover:bg-[#333] rounded disabled:opacity-30 cursor-pointer"><FaArrowLeft /></button>
+                    <button onClick={goForward} disabled={historyIndex === history.length - 1} className="p-1 hover:bg-[#333] rounded disabled:opacity-30 cursor-pointer"><FaArrowRight /></button>
+                    <button onClick={goUp} className="p-1 hover:bg-[#333] rounded cursor-pointer"><FaArrowUp /></button>
                 </div>
                 
                 {/* Address Bar */}
@@ -105,7 +105,7 @@ const FileExplorer = ({ initialPath = "C:/Users/Kushal/Desktop", onClose, onOpen
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-1">
                     {sortedItems.length > 0 ? (
                         sortedItems.map(([name, item]) => (
-                            <div key={name} className="flex justify-center hover:bg-[#white]/10 rounded">
+                            <div key={name} className="flex justify-center hover:bg-[#white]/10 rounded cursor-pointer">
                                 <FileIcon 
                                     name={name} 
                                     item={item} 

@@ -5,7 +5,6 @@ import WindowCard from "./WindowCard.jsx";
 import Taskbar from "./Taskbar.jsx";
 import FileIcon from "../win10/FileIcon";
 import FileExplorer from "../win10/FileExplorer";
-import Browser from "../win10/Browser";
 import VSCode from "../win10/VSCode";
 import Notepad from "../win10/Notepad"; // New Component
 import Obsidian from "../win10/Obsidian.jsx";
@@ -13,7 +12,7 @@ import Obsidian from "../win10/Obsidian.jsx";
 import Terminal from "./Terminal.jsx"; 
 import AboutMe from "../../pages/windowsUI/AboutMe";
 import Resume from "../../pages/windowsUI/Resume.jsx";
-import VideoPlayer from "../win10/VideoPlayer.jsx"; // New Component
+import VLCPlayer from "../win10/VLCPlayer.jsx"; // Revamped VLC Player
 
 const wallpaper = "/assets/wallpaper.jpg";
 
@@ -268,14 +267,17 @@ const DesktopEnv = () => {
                     <div className="flex items-center justify-center h-full bg-[#222]">
                         <img src={item.url || item.content} alt={name} className="max-w-full max-h-full object-contain" />
                     </div>, 
-                    getIconSrc("photos")
+                     getIconSrc("photos")
                 );
-             } else if (item.fileType === 'video' || fileName.endsWith('.mp4')) {
-                 // Open Video Player
+             } else if (item.fileType === 'video' || item.fileType === 'audio' || fileName.endsWith('.mp4') || fileName.endsWith('.mp3')) {
+                 // Open VLC Player (Revamped)
+                 // Determine type for UI logic (show cone or video)
+                 const type = (item.fileType === 'audio' || fileName.endsWith('.mp3')) ? 'audio' : 'video';
+                 
                  openWindow(
-                     `video-${name}`,
-                     name,
-                     <VideoPlayer url={item.url || item.content} />,
+                     `vlc-${name}`,
+                     `${name} - VLC Media Player`,
+                     <VLCPlayer url={item.url || item.content} type={type} title={name} />,
                      "/assets/icons/win10/video-player.webp"
                  );
              } else if (item.appName === 'File Explorer') {

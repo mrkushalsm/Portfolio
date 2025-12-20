@@ -95,7 +95,12 @@ const INITIAL_FS = {
                                 type: "folder",
                                 icon: "music",
                                 children: {
-                                    "Song.mp3": { type: "file", fileType: "audio", icon: "music-file" }
+                                    "Song.mp3": { 
+                                        type: "file", 
+                                        fileType: "audio", 
+                                        url: "/C/Users/Kushal/Music/Song.mp3",
+                                        icon: "music-file" 
+                                    }
                                 }
                             },
                             "Videos": {

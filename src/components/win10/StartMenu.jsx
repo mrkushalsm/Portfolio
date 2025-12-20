@@ -58,7 +58,7 @@ const StartMenu = ({ isOpen, onClose, apps = [], onLaunchItem }) => {
     return (
         <div 
             ref={menuRef}
-            className="absolute bottom-12 left-0 w-[640px] h-[550px] bg-[#1e1e1e]/85 backdrop-blur-xl text-white shadow-[0_0_40px_rgba(0,0,0,0.6)] flex border border-[#333]/50 z-[9999] rounded-t-lg overflow-hidden animate-slideUp"
+            className="absolute bottom-12 left-0 w-[640px] h-[550px] bg-[#1e1e1e]/85 backdrop-blur-xl text-white shadow-[0_0_40px_rgba(0,0,0,0.6)] flex border border-[#333]/50 z-[9999] rounded-t-lg overflow-hidden animate-slideUp cursor-default"
             onClick={(e) => e.stopPropagation()} 
         >
             {/* Left Sidebar (Controls) */}
