@@ -37,7 +37,7 @@ export const projects = [
         name: "Mangalore Bus Routes Finder",
         description: "An intelligent bus route finder for Mangalore city, powered by AI to provide smart route suggestions and journey planning.",
         image: mangaloreBusRoutes,
-        link: "",
+        link: "https://mangalore-bus-routes.vercel.app/",
         github: "https://github.com/mrkushalsm/Mangalore-Bus-Routes",
     },
     {
