@@ -17,9 +17,12 @@ const Notepad = ({ content: initialContent, url, isMarkdown = false, projectRepo
     useEffect(() => {
         if (url) {
             setLoading(true);
-            // Use our proxy to fetch raw content to avoid CORS
-            // Pass raw=true to prevent the proxy from injecting its own script tags (which breaks markdown rendering)
-            fetch(`/api/proxy?url=${encodeURIComponent(url)}&raw=true`)
+            
+            // Checks if it's a local file (starts with /) to bypass proxy
+            const isLocal = url.startsWith('/');
+            const fetchUrl = isLocal ? url : `/api/proxy?url=${encodeURIComponent(url)}&raw=true`;
+
+            fetch(fetchUrl)
                 .then(res => {
                     if (!res.ok) throw new Error("Failed to load content");
                     return res.text();

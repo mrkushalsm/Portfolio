@@ -27,6 +27,7 @@ const INITIAL_FS = {
                                 icon: "desktop",
                                 children: {
                                     // Clean Desktop
+                                    "About Me": { type: "file", fileType: "markdown", content: "about-me", icon: "user-circle" },
                                     "This PC": { type: "file", fileType: "app", appName: "File Explorer", icon: "this-pc" },
                                     "Microsoft Edge": { type: "shortcut", target: "https://www.google.com/webhp?igu=1", icon: "edge" },
                                     "Terminal": { type: "file", fileType: "app", appName: "Terminal", icon: "terminal" },
@@ -38,21 +39,32 @@ const INITIAL_FS = {
                                 type: "folder",
                                 icon: "documents",
                                 children: {
-                                    "Resume.pdf": { type: "file", fileType: "pdf", content: "/assets/resume.pdf", icon: "file-pdf" },
-                                    "Projects": { type: "folder", icon: "folder", children: {} }, 
+                                    "Resume.pdf": { 
+                                        type: "file", 
+                                        fileType: "pdf", 
+                                        url: "/C/Users/Kushal/Documents/Resume.pdf", 
+                                        icon: "file-pdf" 
+                                    },
                                     "Projects": { type: "folder", icon: "folder", children: {} }, 
                                     "Skills.md": { 
                                         type: "file", 
                                         fileType: "markdown", 
-                                        content: Object.entries(skillsData).map(([category, skills]) => 
-                                            `# ${category}\n${skills.map(s => `![${s.name}](${s.icon}) **${s.name}**\n*${s.proficiency}* - ${s.description}`).join('\n\n')}`
-                                        ).join('\n\n---\n\n'), 
+                                        url: "/C/Users/Kushal/Documents/Skills.md", 
                                         icon: "file-text" 
                                     },
-                                    "Certificates": { type: "folder", icon: "folder", children: {} },
                                     "Certificates": { type: "folder", icon: "folder", children: {} }, 
-                                    "Project_Ideas.txt": { type: "file", fileType: "text", content: "1. Build a cool OS in React\n2. Make it pixel perfect", icon: "file-text" },
-                                    "Notes.md": { type: "file", fileType: "markdown", content: "# Daily Notes\n- Drink water\n- Code more", icon: "file-text" }
+                                    "Project_Ideas.txt": { 
+                                        type: "file", 
+                                        fileType: "text", 
+                                        url: "/C/Users/Kushal/Documents/Project_Ideas.txt", 
+                                        icon: "file-text" 
+                                    },
+                                    "Notes.md": { 
+                                        type: "file", 
+                                        fileType: "markdown", 
+                                        url: "/C/Users/Kushal/Documents/Notes.md", 
+                                        icon: "file-text" 
+                                    }
                                 }
                             },
                             "Downloads": {
@@ -60,14 +72,24 @@ const INITIAL_FS = {
                                 icon: "downloads",
                                 children: {
                                     "installer.exe": { type: "file", fileType: "binary", icon: "application" },
-                                    "funny_cat.png": { type: "file", fileType: "image", content: "/assets/icons/win10/photos.ico", icon: "file-image" }
+                                    "funny_cat.png": { 
+                                        type: "file", 
+                                        fileType: "image", 
+                                        url: "/C/Users/Kushal/Downloads/funny_cat.png", 
+                                        icon: "file-image" 
+                                    }
                                 }
                             },
                             "Pictures": {
                                 type: "folder",
                                 icon: "pictures",
                                 children: {
-                                    "Wallpaper.jpg": { type: "file", fileType: "image", content: "/assets/wallpaper.jpg", icon: "file-image" }
+                                    "Wallpaper.jpg": { 
+                                        type: "file", 
+                                        fileType: "image", 
+                                        url: "/C/Users/Kushal/Pictures/Wallpaper.jpg", 
+                                        icon: "file-image" 
+                                    }
                                 }
                             },
                             "Music": {
@@ -95,7 +117,7 @@ const INITIAL_FS = {
                         type: "folder",
                         children: {
                             "cmd.exe": { type: "file", fileType: "app", appName: "Terminal", icon: "terminal" },
-                            "explorer.exe": { type: "file", fileType: "app", appName: "File Explorer", icon: "folder" }
+                            "explorer.exe": { type: "file", fileType: "app", appName: "File Explorer", icon: "imageres_1023" }
                         }
                     }
                 }
@@ -138,10 +160,15 @@ const populateFS = (fs) => {
     // Populate Certificates
     certificateData.forEach(cert => {
          const safeName = cert.title.replace(/[^a-zA-Z0-9 ]/g, "").trim();
-         docs.children["Certificates"].children[`${safeName}.png`] = {
+         // Determine extension based on original image path (simplified)
+         const ext = cert.image.endsWith('.jpg') ? '.jpg' : '.png';
+         
+
+         docs.children["Certificates"].children[`${safeName}${ext}`] = {
              type: "file",
              fileType: "image",
-             content: cert.image,
+             // Point to the REAL file in the C: drive structure (now in cert.image)
+             url: cert.image,
              icon: "file-image",
              meta: cert
          };

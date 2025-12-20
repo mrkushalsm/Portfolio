@@ -2,11 +2,20 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useState, useEffect } from 'react';
 
 const MarkdownViewer = ({ content, isDark }) => {
+    const [rehypePlugins, setRehypePlugins] = useState([]);
+
+    useEffect(() => {
+        import('rehype-raw').then((mod) => {
+            setRehypePlugins([mod.default]);
+        }).catch(err => console.error("Failed to load rehype-raw", err));
+    }, []);
+
     return (
         <div className="prose prose-sm max-w-4xl mx-auto prose-blue prose-img:rounded-md prose-headings:font-semibold prose-a:text-blue-600">
-             <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
+             <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={rehypePlugins} components={{
                 a: ({node, ...props}) => (
                     <a {...props} target="_blank" rel="noopener noreferrer" className="text-[#0078d7] hover:underline" />
                 ),
@@ -25,6 +34,12 @@ const MarkdownViewer = ({ content, isDark }) => {
                             </code>
                         </span>
                     );
+                },
+                input: ({node, ...props}) => {
+                    if (props.type === 'checkbox') {
+                         return <input {...props} type="checkbox" className="mr-2" checked={props.checked || false} readOnly />;
+                    }
+                    return <input {...props} />;
                 },
             }}>
                 {content}

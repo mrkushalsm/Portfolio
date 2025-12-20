@@ -8,11 +8,11 @@ const getIconPath = (iconName) => {
     const iconMap = {
         // System
         "desktop": "/assets/icons/win10/this-pc.ico",
-        "documents": "/assets/icons/win10/folder.ico", // Using folder for now
-        "downloads": "/assets/icons/win10/folder.ico", 
-        "pictures": "/assets/icons/win10/folder.ico",
-        "music": "/assets/icons/win10/folder.ico",
-        "videos": "/assets/icons/win10/folder.ico",
+        "documents": "/assets/icons/win10/document-folder.ico", 
+        "downloads": "/assets/icons/win10/downloads-folder.ico", 
+        "pictures": "/assets/icons/win10/pictures-folder.ico",
+        "music": "/assets/icons/win10/music-folder.ico",
+        "videos": "/assets/icons/win10/video-folder.ico",
         
         // Items
         "folder": "/assets/icons/win10/folder.ico",
@@ -31,10 +31,11 @@ const getIconPath = (iconName) => {
         "photos": "/assets/icons/win10/photos.ico",
         "settings": "/assets/icons/win10/settings.png",
         "terminal": "/assets/icons/terminal.ico",
-        "github": "/assets/icons/github.png", 
-        "linkedin": "/assets/icons/linkedin.png",
+        "github": "/assets/icons/win10/github-mark-white.svg", 
+        "linkedin": "/assets/icons/win10/linkedin.png",
         
         // Custom
+        "user-circle": "/assets/icons/win10/user-circle.ico",
         "imageres_1023": "/assets/icons/win10/imageres_1023.ico", // User requested specific icon
 
         // Fallbacks for common file types if specific key missing
@@ -55,6 +56,7 @@ const getIconPath = (iconName) => {
     if (iconName === 'file-text') return "/assets/icons/win10/file-text.ico";
     if (iconName === 'file-image') return "/assets/icons/win10/file-image.ico";
     if (iconName === 'file-pdf') return "/assets/icons/win10/file-pdf.ico";
+    if (iconName === 'video' || iconName === 'file-video') return "/assets/icons/win10/video-file.ico";
     
     return "/assets/icons/win10/file-text.ico";
 
@@ -80,6 +82,10 @@ const FileIcon = ({ name, item, onOpen, isSelected, onSelect }) => {
             <div className="w-12 h-12 mb-1 relative flex items-center justify-center">
                 <img 
                     src={getIconPath(item.icon || (item.type === 'folder' || item.type === 'drive' ? 'folder' : 'text'))} 
+                    onError={(e) => {
+                        e.target.onerror = null; 
+                        e.target.src = "/assets/icons/win10/application.ico";
+                    }}
                     alt={name}
                     className="max-w-full max-h-full drop-shadow-md select-none"
                     draggable={false}

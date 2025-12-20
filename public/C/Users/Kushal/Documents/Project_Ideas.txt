@@ -1,0 +1,4 @@
+1. Build a cool OS in React
+2. Make it pixel perfect
+3. Implement a real file system in public folder
+4. Add drag and drop support

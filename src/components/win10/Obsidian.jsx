@@ -19,11 +19,16 @@ const Obsidian = ({ content: initialContent, url, fileName = "Untitled.md", onOp
     const [content, setContent] = useState(initialContent || (url ? "Loading..." : ""));
     const [loading, setLoading] = useState(!!url);
 
-    // Fetch content if URL is provided (for READMEs)
+    // Fetch content if URL is provided (for READMEs or Local Public Files)
     React.useEffect(() => {
         if (url) {
             setLoading(true);
-            fetch(`/api/proxy?url=${encodeURIComponent(url)}&raw=true`)
+            
+            // Check if it's a local file (in public folder) or remote
+            const isLocal = url.startsWith('/');
+            const fetchUrl = isLocal ? url : `/api/proxy?url=${encodeURIComponent(url)}&raw=true`;
+
+            fetch(fetchUrl)
                 .then(res => {
                     if (!res.ok) throw new Error("Failed to load content");
                     return res.text();

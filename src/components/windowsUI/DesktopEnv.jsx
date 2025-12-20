@@ -92,13 +92,21 @@ const DesktopEnv = () => {
             "file-text": "/assets/icons/win10/file-text.ico",
             "file-pdf": "/assets/icons/win10/file-pdf.ico",
             "edge": "/assets/icons/win10/edge.png",
-            "terminal": "/assets/icons/terminal.ico",
+            "terminal": "/assets/icons/terminal.ico", // Corrected: It is in root icons folder
             "vscode": "/assets/icons/win10/vscode.png",
             "this-pc": "/assets/icons/win10/this-pc.ico",
             "photos": "/assets/icons/win10/photos.ico",
             "settings": "/assets/icons/win10/settings.png",
-            "user-circle": "/assets/icons/win10/user-circle.png", // Or generic
-            "github": "/assets/icons/github.png"
+            "user-circle": "/assets/icons/win10/user-circle.ico", 
+            "github": "/assets/icons/win10/github-mark-white.svg", // Correct SVG
+            "linkedin": "/assets/icons/win10/linkedin.png", 
+            "documents": "/assets/icons/win10/document-folder.ico",
+            "downloads": "/assets/icons/win10/downloads-folder.ico",
+            "pictures": "/assets/icons/win10/pictures-folder.ico",
+            "music": "/assets/icons/win10/music-folder.ico",
+            "videos": "/assets/icons/win10/video-folder.ico", 
+            "desktop": "/assets/icons/win10/desktop-folder.ico",
+            "imageres_1023": "/assets/icons/win10/imageres_1023.ico"
         };
         // Normalize: if it looks like a path, return it. If it's a key, map it.
         if (iconName && (iconName.startsWith('/') || iconName.startsWith('http'))) return iconName;
@@ -191,8 +199,8 @@ const DesktopEnv = () => {
                          return;
                      }
 
-                     // All other links -> Internal Browser (Standard)
-                     openWindow(`browser-${name}-${Date.now()}`, name, <Browser initialUrl={targetUrl} />, getIconSrc("edge"));
+                     // All other links -> Open in Real Browser
+                     window.open(targetUrl, '_blank');
                      return;
                  }
              }
@@ -202,9 +210,12 @@ const DesktopEnv = () => {
                   const uniqueId = `${item.appName.toLowerCase().replace(/\s/g, '-')}-${Date.now()}`;
                   
                   if (item.appName === 'Edge') {
-                      openWindow(uniqueId, "New Tab", <Browser />, getIconSrc("edge"));
+                      window.open('https://google.com', '_blank');
+                      return;
                   } else if (item.appName === 'File Explorer') {
-                      openWindow(uniqueId, "This PC", <FileExplorer initialPath="C:" onOpenFile={handleFileOpen} />, getIconSrc("this-pc"));
+                      // If specific icon is provided (like imageres_1023), use it, otherwise default to this-pc or folder
+                      const useIcon = item.icon === 'imageres_1023' ? "imageres_1023" : "this-pc";
+                      openWindow(uniqueId, "File Explorer", <FileExplorer initialPath="C:" onOpenFile={handleFileOpen} />, getIconSrc(useIcon));
                   } else if (item.appName === 'Terminal') {
                       openWindow(uniqueId, "Terminal", <Terminal />, getIconSrc("terminal"));
                   } 
@@ -230,7 +241,8 @@ const DesktopEnv = () => {
                      // NEW: Open all Markdown in Obsidian
                      openWindow(`obsidian-${fileName}`, `${fileName} - Obsidian`, 
                          <Obsidian 
-                            content={item.content} 
+                            content={item.content}
+                            url={item.url} // PASS URL!
                             fileName={fileName}
                          />, 
                          getIconSrc("file-text")
@@ -239,7 +251,10 @@ const DesktopEnv = () => {
              } else if (item.fileType === 'text' || fileName.endsWith('.txt')) {
                  // Notepad Fallback (Text files stay in Notepad as requested)
                  openWindow(`notepad-${fileName}`, `${fileName} - Notepad`, 
-                    <Notepad content={item.content} />, 
+                    <Notepad 
+                        content={item.content} 
+                        url={item.url} // PASS URL!
+                    />, 
                     getIconSrc("file-text")
                  );
              } else if (item.fileType === 'pdf' || fileName.endsWith('.pdf')) {
@@ -249,7 +264,7 @@ const DesktopEnv = () => {
                     `img-${name}`, 
                     name, 
                     <div className="flex items-center justify-center h-full bg-[#222]">
-                        <img src={item.content} alt={name} className="max-w-full max-h-full object-contain" />
+                        <img src={item.url || item.content} alt={name} className="max-w-full max-h-full object-contain" />
                     </div>, 
                     getIconSrc("photos")
                 );
@@ -265,9 +280,9 @@ const DesktopEnv = () => {
         const docs = getDirContent("C:/Users/Kushal/Documents");
         if (!docs) return;
 
-        if (appName === "Skills.txt") {
-            const item = docs["Skills.txt"];
-            if (item) handleFileOpen("Skills.txt", item);
+        if (appName === "Skills.md") {
+            const item = docs["Skills.md"];
+            if (item) handleFileOpen("Skills.md", item);
         } else if (appName === "Projects") {
              // Pass explicit path so it doesn't look in Desktop
              handleFileOpen("Projects", { type: "folder", path: "C:/Users/Kushal/Documents/Projects" }); 
@@ -292,20 +307,18 @@ const DesktopEnv = () => {
     // Specific requested items for Start Menu
     const specificStartApps = [
         { name: "Projects", icon: getIconSrc("folder"), action: () => handlePinnedLaunch("Projects") },
-        { name: "Skills.txt", icon: getIconSrc("file-text"), action: () => handlePinnedLaunch("Skills.txt") },
+        { name: "Skills.md", icon: getIconSrc("file-text"), action: () => handlePinnedLaunch("Skills.md") },
         { name: "Certificates", icon: getIconSrc("folder"), action: () => handlePinnedLaunch("Certificates") },
         { name: "Resume.pdf", icon: getIconSrc("file-pdf"), action: () => handlePinnedLaunch("Resume.pdf") },
         // Custom Styled Socials
         { 
             name: "GitHub", 
-            icon: <FaGithub />, 
-            bgColor: "bg-[#24292e]", 
+            icon: getIconSrc("github"),
             action: () => handleFileOpen("GitHub", { target: "https://github.com/mrkushalsm", type: "shortcut" }) 
         },
         { 
             name: "LinkedIn", 
-            icon: <FaLinkedin />, 
-            bgColor: "bg-[#0077b5]", 
+            icon: getIconSrc("linkedin"),
             action: () => handleFileOpen("LinkedIn", { target: "https://www.linkedin.com/in/mrkushalsm/", type: "shortcut" }) 
         }
     ];

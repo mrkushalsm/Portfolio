@@ -77,7 +77,7 @@ const Taskbar = ({
                             title={win.title}
                         >
                             <img 
-                               src={win.icon && win.icon.includes('.') ? `/assets/icons/win10/${win.icon}.ico` : `/assets/icons/win10/${win.icon || 'file-text'}.ico`} 
+                               src={win.icon && (win.icon.startsWith('/') || win.icon.startsWith('http')) ? win.icon : `/assets/icons/win10/${win.icon || 'file-text'}.ico`} 
                                onError={(e) => {
                                    if (!e.target.src.includes('file-text')) e.target.src = "/assets/icons/win10/file-text.ico";
                                }}
@@ -98,7 +98,7 @@ const Taskbar = ({
                         <FaChevronUp size={10} />
                     </div>
                     <div className="h-full px-1 flex items-center justify-center hover:bg-white/10 cursor-pointer">
-                        <img src="/assets/taskbar/wifi.png" alt="Wifi" className="h-4" />
+                        <img src="/assets/taskbar/wifi.ico" alt="Wifi" className="h-4" />
                     </div>
                     <div className="h-full px-1 flex items-center justify-center hover:bg-white/10 cursor-pointer">
                         <img src="/assets/taskbar/battery.png" alt="Battery" className="h-4" />
