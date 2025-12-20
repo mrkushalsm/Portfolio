@@ -102,7 +102,12 @@ const INITIAL_FS = {
                                 type: "folder",
                                 icon: "videos",
                                 children: {
-                                    "Demo.mp4": { type: "file", fileType: "video", icon: "video-file" }
+                                    "Demo.mp4": { 
+                                        type: "file", 
+                                        fileType: "video", 
+                                        url: "/C/Users/Kushal/Videos/Demo.mp4",
+                                        icon: "video-file" 
+                                    }
                                 }
                             }
                         }

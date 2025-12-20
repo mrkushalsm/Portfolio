@@ -13,6 +13,7 @@ import Obsidian from "../win10/Obsidian.jsx";
 import Terminal from "./Terminal.jsx"; 
 import AboutMe from "../../pages/windowsUI/AboutMe";
 import Resume from "../../pages/windowsUI/Resume.jsx";
+import VideoPlayer from "../win10/VideoPlayer.jsx"; // New Component
 
 const wallpaper = "/assets/wallpaper.jpg";
 
@@ -269,6 +270,14 @@ const DesktopEnv = () => {
                     </div>, 
                     getIconSrc("photos")
                 );
+             } else if (item.fileType === 'video' || fileName.endsWith('.mp4')) {
+                 // Open Video Player
+                 openWindow(
+                     `video-${name}`,
+                     name,
+                     <VideoPlayer url={item.url || item.content} />,
+                     "/assets/icons/win10/video-player.webp"
+                 );
              } else if (item.appName === 'File Explorer') {
                  openWindow(`explorer-${Date.now()}`, "This PC", <FileExplorer initialPath="C:" onOpenFile={handleFileOpen} />, getIconSrc("this-pc"));
              }
