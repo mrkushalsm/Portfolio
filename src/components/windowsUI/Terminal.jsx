@@ -88,6 +88,7 @@
 // export default Terminal;
 
 import React, { useState, useEffect, useRef } from "react";
+import { useFileSystem } from "../../context/FileSystemContext";
 import { projects } from "../../data/projectsData";
 import { skillsData } from "../../data/skillsData";
 
@@ -105,53 +106,24 @@ const ASCII_ART = `
 const HELP_TEXT = `
 Available commands:
 
-Navigation & Help:
-  help      - Show this help message
-  clear     - Clear the terminal
-  exit      - Close the terminal
+File System (VFS):
+  ls / dir  - List accessible files and directories
+  cd [dir]  - Change directory
+  type [file]- View file contents
+  pwd       - Print working directory
 
 Portfolio Information:
-  about     - Display a brief bio and introduction
-  skills    - List technical skills and proficiencies
-  projects  - Show a list of featured projects
-  experience - Display work history
-  education - Show educational background
-
-Interactive:
-  open [project] - Open a specific project in a new tab
+  about     - Display a brief bio
+  skills    - List technical skills
+  projects  - Show featured projects
+  contact   - Display contact info
 
 Fun & Easter Eggs:
   neofetch  - Display system information
-  cowsay [msg] - Make a cow say something
+  cowsay    - Make a cow say something
   fortune   - Show a random quote
-
-File System:
-  ls        - List available projects
-  cd [dir]  - Change directory (navigation)
-  cat [file] - View file contents
-
-Social & Links:
-  github    - Open GitHub profile
-  linkedin  - Open LinkedIn profile
-  twitter   - Open Twitter profile
-  resume    - View or download resume
-  blog      - Visit blog
-  certifications - List certifications
-
-Utility:
-  date      - Show current date and time
-  whoami    - Display user information
-  echo [text] - Repeat back the input text
+  clear     - Clear the terminal
 `;
-
-// Convert projects data to terminal format
-const PROJECTS = projects.map(project => ({
-    name: project.name.toLowerCase().replace(/\s+/g, '-'),
-    description: project.description
-}));
-
-// Convert skills data to flat array for terminal display
-const SKILLS = Object.values(skillsData).flat().map(skill => skill.name);
 
 const FORTUNES = [
     "The only way to do great work is to love what you do.",
@@ -162,14 +134,19 @@ const FORTUNES = [
 ];
 
 const Terminal = ({ onCommand, initialLogs = [], prompt = "$", showInput = true, onExit }) => {
+    const { resolvePath, getDirContent } = useFileSystem();
+    
+    // Default start path in VFS
+    const [currentPath, setCurrentPath] = useState("C:/Users/Kushal");
+    
     const [input, setInput] = useState("");
     const [logs, setLogs] = useState([]);
-    const [currentDir, setCurrentDir] = useState("~");
     const [isBooting, setIsBooting] = useState(true);
     const terminalRef = useRef(null);
 
-    // Realistic boot sequence
+    // Boot sequence
     useEffect(() => {
+
         if (initialLogs.length > 0) {
             setLogs(initialLogs);
             setIsBooting(false);
@@ -177,208 +154,242 @@ const Terminal = ({ onCommand, initialLogs = [], prompt = "$", showInput = true,
         }
 
         const bootSequence = [
-            { text: "Portfolio OS [Version 1.0.0]", delay: 100 },
+            { text: "Portfolio OS [Version 10.0.19045.3693]", delay: 100 },
             { text: "(c) 2025 Kushal S. M. All rights reserved.", delay: 200 },
             { text: "", delay: 300 },
             { text: 'Type "help" to see available commands', type: 'output', delay: 400 }
         ];
 
         let timeouts = [];
-        
         bootSequence.forEach(({ text, type = 'output', delay }) => {
-            const timeout = setTimeout(() => {
+            timeouts.push(setTimeout(() => {
                 setLogs(prev => [...prev, { text, type }]);
-            }, delay);
-            timeouts.push(timeout);
+            }, delay));
         });
 
-        const finalTimeout = setTimeout(() => {
-            setIsBooting(false);
-        }, 500);
-        timeouts.push(finalTimeout);
-
+        timeouts.push(setTimeout(() => setIsBooting(false), 500));
         return () => timeouts.forEach(clearTimeout);
     }, []);
 
-    const username = "guest";
-    const hostname = "kushal-pc";
-    const promptString = `${username}@${hostname}:${currentDir}$`;
+    // Construct the prompt path (e.g., C:\Users\Kushal)
+    // Windows CMD style: C:\Users\Kushal>
+    const displayPath = currentPath.replace(/\//g, '\\') + ">";
 
-    const executeCommand = (command) => {
-        const args = command.trim().split(/\s+/);
+    // Path Utilities
+    const normalizePath = (targetPath) => {
+        // Handle ".." and "."
+        // If absolute (starts with C:), use as is
+        // If relative, append to currentPath
+        let absPath = targetPath;
+        
+        if (!targetPath.startsWith("C:")) {
+            // Join with current path
+            // Handle root case carefully
+            const separator = currentPath.endsWith('/') ? '' : '/';
+            absPath = `${currentPath}${separator}${targetPath}`;
+        }
+
+        // Resolve ".."
+        const parts = absPath.split('/');
+        const stack = [];
+        
+        for (const part of parts) {
+            if (part === "" || part === ".") continue;
+            if (part === "..") {
+                if (stack.length > 0) stack.pop();
+            } else {
+                stack.push(part);
+            }
+        }
+        
+        // Reconstruct
+        // If stack is empty (went past root), default to C:
+        if (stack.length === 0) return "C:";
+        
+        // Ensure "C:" is first
+        if (stack[0] !== "C:") stack.unshift("C:");
+        
+        return stack.join('/');
+    };
+
+    const executeCommand = (commandLine) => {
+        const args = commandLine.trim().split(/\s+/);
         const cmd = args[0].toLowerCase();
+        const param = args[1]; // simplified arg handling
 
-        // Helper to add output to logs
-        const addOutput = (text, type = 'output') => {
+        const addLog = (text, type = 'output') => {
             setLogs(prev => [...prev, { text, type }]);
         };
 
-        // Handle commands
         switch (cmd) {
+            case 'help':
+                addLog(HELP_TEXT);
+                break;
+
             case 'clear':
+            case 'cls':
                 setLogs([]);
-                return;
+                break;
 
             case 'exit':
                 if (onExit) onExit();
-                return;
-
-            case 'help':
-                addOutput(HELP_TEXT);
                 break;
 
-            case 'about':
-                addOutput("I'm a passionate developer with expertise in web technologies...");
-                break;
-
-            case 'skills':
-                addOutput("Technical Skills:\n" + SKILLS.map(skill => `- ${skill}`).join('\n'));
-                break;
-
-            case 'projects':
-                addOutput("Featured Projects:\n" +
-                    PROJECTS.map(p => `${p.name}: ${p.description}`).join('\n'));
-                break;
-
-            case 'experience':
-                addOutput("Work Experience:\n- Software Engineer at Company (2020-2023)\n- Intern at Startup (2019-2020)");
-                break;
-
-            case 'education':
-                addOutput("Education:\n- B.Tech in Computer Science, University (2016-2020)");
-                break;
-
-            case 'neofetch':
-                addOutput(ASCII_ART);
-                addOutput(`OS: Portfolio OS\nHost: Personal Website\nTerminal: Web Terminal v1.0`);
-                break;
-
-            case 'cowsay':
-                { const message = args.slice(1).join(' ') || 'Moo!';
-                const cow = ` ${'_'.repeat(message.length + 2)}
-< ${message} >
- ${'-'.repeat(message.length + 2)}
-        \\   ^__^
-         \\  (oo)\\_______
-            (__)\\       )\\/\\
-                ||----w |
-                ||     ||`;
-                addOutput(cow);
-                break; }
-
-            case 'fortune':
-                { const randomFortune = FORTUNES[Math.floor(Math.random() * FORTUNES.length)];
-                addOutput(randomFortune);
-                break; }
-
-            case 'ls':
-                if (currentDir === '~') {
-                    // In root directory, show all project names
-                    addOutput(PROJECTS.map(p => p.name).join('  '));
-                } else {
-                    // In a project directory, show project details
-                    const projectName = currentDir.replace('~/', '');
-                    const project = projects.find(p => p.name.toLowerCase().replace(/\s+/g, '-') === projectName);
-                    if (project) {
-                        addOutput(`Project Details for ${project.name}:`);
-                        addOutput(`Name: ${project.name}`);
-                        addOutput(`Description: ${project.description}`);
-                        addOutput(`Live Demo: ${project.link || 'Not available'}`);
-                        addOutput(`GitHub: ${project.github || 'Not available'}`);
+            case 'pwd': // Keep pwd for convenience, though prompt shows it
+            case 'cd': // 'cd' with no args prints cwd in windows, but we can treat 'pwd' as an alias or just keep 'cd' logic
+                if (cmd === 'pwd' || (cmd === 'cd' && !param)) {
+                     addLog(currentPath.replace(/\//g, '\\'));
+                     return;
+                }
+                // Fallthrough for cd with param
+            
+            case 'cd':
+                {
+                    const target = normalizePath(param);
+                    
+                    // Validate existence
+                    const node = resolvePath(target);
+                    if (node && (node.type === 'folder' || node.type === 'drive')) {
+                        setCurrentPath(target);
                     } else {
-                        addOutput('Project not found', 'error');
+                        addLog(`The system cannot find the path specified.`);
                     }
                 }
                 break;
 
-            case 'cd':
-                { const dir = args[1] || '~';
-                if (dir === '~' || PROJECTS.some(p => p.name === dir)) {
-                    setCurrentDir(dir === '~' ? '~' : `~/${dir}`);
-                    addOutput(`Changed directory to ${dir}`);
-                } else {
-                    addOutput(`cd: no such directory: ${dir}`, 'error');
+            case 'dir':
+                {
+                    // Get Access
+                    const content = getDirContent(currentPath);
+                    if (!content) {
+                        addLog(`File Not Found`);
+                        return;
+                    }
+                    
+                    // List items
+                    const items = Object.entries(content);
+                    if (items.length === 0) {
+                        addLog(" File Not Found");
+                    } else {
+                        // Windows format:
+                        // <DIR>          FolderName
+                        //                FileName.ext
+                        const output = items.map(([name, item]) => {
+                            const isDir = item.type === 'folder' || item.type === 'drive';
+                            // Align columns roughly
+                            if (isDir) {
+                                return `<DIR>          ${name}`;
+                            } else {
+                                return `               ${name}`;
+                            }
+                        }).join('\n');
+                        
+                        addLog(` Directory of ${currentPath.replace(/\//g, '\\')}\n\n${output}`);
+                    }
                 }
-                break; }
+                break;
 
-            case 'cat':
-                { const file = args[1];
-                const project = PROJECTS.find(p => p.name === file);
-                if (project) {
-                    addOutput(`Project: ${project.name}\n${project.description}`);
-                } else {
-                    addOutput(`cat: ${file || 'no file specified'}: No such file or directory`, 'error');
+            case 'type': // Windows equivalent of cat
+                {
+                    if (!param) {
+                        addLog("The syntax of the command is incorrect.");
+                        return;
+                    }
+
+                    const target = normalizePath(param);
+                    const node = resolvePath(target);
+
+                    if (node) {
+                        if (node.type === 'folder' || node.type === 'drive') {
+                            addLog(`Access is denied.`);
+                        } else {
+                            // It's a file
+                            if (node.content) {
+                                addLog(node.content);
+                            } else if (node.url) {
+                                addLog(`[File Content located at ${node.url}]`);
+                            } else {
+                                addLog("");
+                            }
+                        }
+                    } else {
+                        addLog(`The system cannot find the file specified.`);
+                    }
                 }
-                break; }
+                break;
 
-            case 'open':
-                { const projectToOpen = args[1];
-                if (PROJECTS.some(p => p.name === projectToOpen)) {
-                    addOutput(`Opening ${projectToOpen} in a new tab...`);
-                    // In a real app, you would use window.open() here
-                } else {
-                    addOutput(`No project named '${projectToOpen}' found`, 'error');
-                }
-                break; }
 
+
+            case 'whoami':
+                addLog(`${hostname}\\${username}`);
+                break;
+
+            case 'neofetch':
+                addLog(ASCII_ART);
+                addLog(`OS: Portfolio OS (React)\nShell: Web Terminal\nHost: ${hostname}\nUptime: Always`);
+                break;
+
+            case 'cowsay':
+                const msg = args.slice(1).join(' ') || "Moo!";
+                addLog(`
+ ${'_'.repeat(msg.length + 2)}
+< ${msg} >
+ ${'-'.repeat(msg.length + 2)}
+        \\   ^__^
+         \\  (oo)\\_______
+            (__)\\       )\\/\\
+                ||----w |
+                ||     ||
+                `);
+                break;
+                
+            case 'fortune':
+                addLog(FORTUNES[Math.floor(Math.random() * FORTUNES.length)]);
+                break;
+
+            // --- Keep Legacy Info Commands for convenience ---
+            case 'about':
+                addLog("I'm a passionate developer building cool things on the web.");
+                break;
+            case 'skills':
+                addLog("Technical Skills:\n" + Object.values(skillsData).flat().map(s => `- ${s.name}`).join('\n'));
+                break;
+            case 'projects':
+                addLog("My Projects:\n" + projects.map(p => `* ${p.name}`).join('\n'));
+                break;
+             
+             case 'open':
             case 'github':
             case 'linkedin':
             case 'twitter':
             case 'resume':
             case 'blog':
             case 'certifications':
-                addOutput(`Opening ${cmd}...`);
-                // In a real app, you would use window.open() with the actual URLs
-                break;
-
-            case 'date':
-                addOutput(new Date().toString());
-                break;
-
-            case 'whoami':
-                addOutput('portfolio-user');
-                break;
-
-            case 'echo':
-                addOutput(args.slice(1).join(' '));
+                addLog(`'${cmd}' is not recognized as an internal or external command, operable program or batch file.`);
                 break;
 
             default:
-                // Pass through to parent component if command not found
-                if (onCommand) {
-                    const output = onCommand(command);
-                    if (output && output.length > 0) {
-                        output.forEach(text => addOutput(text));
-                    } else {
-                        addOutput(`command not found: ${cmd}`, 'error');
-                    }
-                } else {
-                    addOutput(`command not found: ${cmd}`, 'error');
-                }
+                addLog(`'${cmd}' is not recognized as an internal or external command, operable program or batch file.`);
         }
     };
 
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' && input.trim()) {
             const command = input.trim();
-            // Add command to logs
-            setLogs(prev => [...prev, { text: command, type: 'command', dir: currentDir }]);
-            // Process command
+            // Windows CMD style output for command echo
+            // usually it just prints the prompt + command.
+            // My existing log logic does this: prompt + command. 
+            // setLogs(prev => [...prev, { text: command, type: 'command', path: displayPath }]);
+            setLogs(prev => [...prev, { text: command, type: 'command', path: displayPath }]);
             executeCommand(command);
             setInput("");
         } else if (e.key === 'l' && e.ctrlKey) {
-            // Ctrl+L to clear the screen
             e.preventDefault();
             setLogs([]);
-        } else if (e.key === 'c' && e.ctrlKey) {
-            // Ctrl+C to cancel current input
-            e.preventDefault();
-            setLogs(prev => [...prev, { text: '^C', type: 'output' }]);
-            setInput("");
         }
     };
 
-    // Auto-scroll to bottom when logs change
+    // Auto-scroll
     useEffect(() => {
         if (terminalRef.current) {
             terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
@@ -386,53 +397,41 @@ const Terminal = ({ onCommand, initialLogs = [], prompt = "$", showInput = true,
     }, [logs]);
 
     return (
-        <div
+        <div 
             ref={terminalRef}
-            className="h-full bg-black text-green-400 font-mono text-sm p-4 overflow-auto"
-            style={{
-                background: 'rgba(10, 10, 10, 0.95)',
-                backgroundImage: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
-                backgroundSize: '100% 2px, 3px 100%',
-                boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.5)',
-                fontFamily: "'Courier New', Courier, monospace",
-            }}
+            className="h-full bg-[#0c0c0c] text-[#cccccc] font-mono text-sm p-2 overflow-auto select-text"
             onClick={() => document.querySelector('.terminal-input')?.focus()}
         >
-            {logs.map((log, index) => (
-                <div
-                    key={index}
-                    className={`mb-1 whitespace-pre-wrap break-words ${
-                        log.type === 'command' ? 'text-green-400' :
-                            log.type === 'error' ? 'text-red-400' : 'text-gray-300'
-                    }`}
-                >
+             {logs.map((log, index) => (
+                <div key={index} className="mb-px break-words">
                     {log.type === 'command' ? (
-                        <div className="flex items-center flex-wrap">
-                            <span className="text-green-400 mr-2" style={{ textShadow: '0 0 5px rgba(74, 222, 128, 0.5)' }}>
-                                {username}@{hostname}:{log.dir || '~'}$
-                            </span>
-                            <span className="text-white" style={{ textShadow: '0 0 5px rgba(255, 255, 255, 0.5)' }}>{log.text}</span>
+                        <div className="flex flex-wrap gap-x-2">
+                             <span className="text-white">{log.path}</span>
+                             <span className="text-white">{log.text}</span>
                         </div>
                     ) : (
-                        <span style={{ textShadow: '0 0 5px rgba(74, 222, 128, 0.5)' }}>{log.text}</span>
+                        <div className={`${log.type === 'error' ? 'text-red-400' : 'text-gray-300'} whitespace-pre-wrap font-mono`}>
+                            {log.text}
+                        </div>
                     )}
                 </div>
             ))}
+            
             {!isBooting && showInput && (
-                <div className="flex items-center flex-nowrap">
-                    <span className="text-green-400 whitespace-nowrap mr-2" style={{ textShadow: '0 0 5px rgba(74, 222, 128, 0.5)' }}>
-                        {promptString}
-                    </span>
-                    <input
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        className="terminal-input bg-transparent border-none outline-none text-white w-full relative min-w-0 flex-1 font-mono"
-                        style={{ textShadow: '0 0 5px rgba(255, 255, 255, 0.5)' }}
-                        autoFocus
-                        spellCheck="false"
-                    />
+                <div className="flex flex-wrap gap-x-0">
+                    <span className="text-white mr-2">{displayPath}</span>
+                    <div className="flex-1 flex">
+                        <input
+                            type="text"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            className="terminal-input bg-transparent border-none outline-none text-white flex-1 min-w-[50px] font-mono p-0"
+                            autoFocus
+                            spellCheck="false"
+                            autoComplete="off"
+                        />
+                    </div>
                 </div>
             )}
         </div>
