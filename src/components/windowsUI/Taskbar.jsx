@@ -11,10 +11,11 @@ const Taskbar = ({
     pinnedApps = [],
     onLaunchItem // NEW prop
 }) => {
-    const [currentTime, setCurrentTime] = useState(new Date());
+    const [currentTime, setCurrentTime] = useState(null);
     const [isStartOpen, setIsStartOpen] = useState(false);
 
     useEffect(() => {
+        setCurrentTime(new Date());
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
@@ -111,8 +112,8 @@ const Taskbar = ({
                     
                     {/* Clock */}
                     <div className="flex flex-col items-end justify-center h-full px-2 hover:bg-white/10 cursor-pointer text-center leading-tight">
-                        <span>{formatTime(currentTime)}</span>
-                        <span className="text-[10px]">{formatDate(currentTime)}</span>
+                        <span>{currentTime ? formatTime(currentTime) : '\u00A0'}</span>
+                        <span className="text-[10px]">{currentTime ? formatDate(currentTime) : '\u00A0'}</span>
                     </div>
 
 
