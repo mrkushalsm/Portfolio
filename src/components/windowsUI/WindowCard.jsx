@@ -166,7 +166,7 @@ const WindowCard = forwardRef(({
                 )}
 
                  {/* Focus Overlay */}
-                 {(!isActive || isDraggingRef.current) && (
+                 {!isActive && (
                     <div 
                         className="absolute inset-x-0 bottom-0 top-8 z-[9999] bg-transparent"
                         style={{ cursor: 'default' }}
