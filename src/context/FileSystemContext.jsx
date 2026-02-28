@@ -30,6 +30,7 @@ const INITIAL_FS = {
                                     "About Me": { type: "file", fileType: "markdown", content: "about-me", icon: "user-circle" },
                                     "This PC": { type: "file", fileType: "app", appName: "File Explorer", icon: "this-pc" },
                                     "Terminal": { type: "file", fileType: "app", appName: "Terminal", icon: "terminal" },
+                                    "Task Manager": { type: "file", fileType: "app", appName: "Task Manager", icon: "task-manager" },
                                     "GitHub": { type: "shortcut", target: "https://github.com/mrkushalsm", icon: "github" },
                                     "LinkedIn": { type: "shortcut", target: "https://www.linkedin.com/in/mrkushalsm/", icon: "linkedin" },
                                 }

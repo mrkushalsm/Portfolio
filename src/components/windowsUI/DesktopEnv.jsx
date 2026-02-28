@@ -13,6 +13,7 @@ import Terminal from "./Terminal.jsx";
 import AboutMe from "../../pages/windowsUI/AboutMe";
 import Resume from "../../pages/windowsUI/Resume.jsx";
 import VLCPlayer from "../win10/VLCPlayer.jsx"; // Revamped VLC Player
+import GitHubTaskManager from "../win10/GitHubTaskManager.jsx";
 
 const wallpaper = "/assets/wallpaper.jpg";
 
@@ -106,7 +107,8 @@ const DesktopEnv = () => {
             "music": "/assets/icons/win10/music-folder.ico",
             "videos": "/assets/icons/win10/video-folder.ico", 
             "desktop": "/assets/icons/win10/desktop-folder.ico",
-            "imageres_1023": "/assets/icons/win10/imageres_1023.ico"
+            "imageres_1023": "/assets/icons/win10/imageres_1023.ico",
+            "task-manager": "/assets/icons/win10/task-manager.webp"
         };
         // Normalize: if it looks like a path, return it. If it's a key, map it.
         if (iconName && (iconName.startsWith('/') || iconName.startsWith('http'))) return iconName;
@@ -219,6 +221,8 @@ const DesktopEnv = () => {
                       openWindow(uniqueId, "File Explorer", <FileExplorer initialPath={startPath} onOpenFile={handleFileOpen} />, getIconSrc(useIcon));
                   } else if (item.appName === 'Terminal') {
                       openWindow(uniqueId, "Terminal", <Terminal />, getIconSrc("terminal"));
+                  } else if (item.appName === 'Task Manager') {
+                      openWindow(uniqueId, "Task Manager", <GitHubTaskManager />, getIconSrc("task-manager"));
                   } 
                   return;
              }
