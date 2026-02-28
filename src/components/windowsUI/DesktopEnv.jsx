@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { useFileSystem } from "../../context/FileSystemContext";
 import WindowCard from "./WindowCard.jsx";
@@ -23,6 +24,15 @@ const DesktopEnv = () => {
     const [windows, setWindows] = useState([]);
     const [activeWindowId, setActiveWindowId] = useState(null);
     const zIndexRef = useRef(100);
+    const [isShuttingDown, setIsShuttingDown] = useState(false);
+    const router = useRouter();
+
+    const handleShutdown = () => {
+        setIsShuttingDown(true);
+        setTimeout(() => {
+            router.push("/?from=shutdown");
+        }, 2500);
+    };
     
     // Fetch desktop content
     const desktopContent = getDirContent("C:/Users/Kushal/Desktop") || {};
@@ -93,13 +103,13 @@ const DesktopEnv = () => {
             "file-text": "/assets/icons/win10/file-text.ico",
             "file-pdf": "/assets/icons/win10/file-pdf.ico",
             "edge": "/assets/icons/win10/edge.png",
-            "terminal": "/assets/icons/terminal.ico", // Corrected: It is in root icons folder
+            "terminal": "/assets/icons/terminal.ico",
             "vscode": "/assets/icons/win10/vscode.png",
             "this-pc": "/assets/icons/win10/this-pc.ico",
             "photos": "/assets/icons/win10/photos.ico",
             "settings": "/assets/icons/win10/settings.png",
             "user-circle": "/assets/icons/win10/user-circle.ico", 
-            "github": "/assets/icons/win10/github-mark-white.svg", // Correct SVG
+            "github": "/assets/icons/win10/github-mark-white.svg",
             "linkedin": "/assets/icons/win10/linkedin.png", 
             "documents": "/assets/icons/win10/document-folder.ico",
             "downloads": "/assets/icons/win10/downloads-folder.ico",
@@ -179,17 +189,7 @@ const DesktopEnv = () => {
                              readmeId, 
                              `${projectTitle} - ReadMe`, 
                              <Obsidian 
-                                content={null} // It will fetch via URL logic inside (wait, Obsidian needs URL logic added!)
-                                // Wait, Obsidian rewrite didn't include URL fetching logic like Notepad had!
-                                // Use the content/url logic or fetch inside Obsidian? 
-                                // Notepad had internal fetch. Obsidian currently expects 'content'.
-                                // I must update Obsidian to accept URL or fetch here. 
-                                // NOTE: The new Obsidian component I wrote takes `content`. 
-                                // The fetching logic was in Notepad. I should move it or pass content.
-                                // But here we have a URL.
-                                // Let's pass the URL and update Obsidian to handle it, OR fetch here.
-                                // Notepad handled it internally. Let's make Obsidian handle it too for consistency.
-                                // I will pass `url` to Obsidian and update Obsidian to fetch it.
+                                content={null} 
                                 url={rawUrl} 
                                 fileName="README.md"
                                 projectTitle={projectTitle} // Pass Title for Zen Header
@@ -337,6 +337,7 @@ const DesktopEnv = () => {
     ];
 
     return (
+        <>
         <div className="relative w-full h-screen overflow-hidden bg-cover bg-center select-none"
             style={{ backgroundImage: `url(${wallpaper})` }}
         >
@@ -385,9 +386,38 @@ const DesktopEnv = () => {
                 onFocus={focusWindow}
                 startApps={allStartApps}
                 onLaunchItem={handleFileOpen}
-                // pinnedApps={realPinnedApps} // REMOVED as per user request (not taskbar)
+                onShutdown={handleShutdown}
             />
         </div>
+        
+        {/* Shutdown Overlay */}
+        {isShuttingDown && (
+            <div className="absolute inset-0 z-[99999] bg-black animate-[fadeToBlack_0.5s_forwards] flex flex-col items-center justify-center text-white cursor-none">
+                <div className="mt-20 flex flex-col items-center gap-6 animate-[fadeIn_0.5s_0.5s_forwards] opacity-0">
+                    <div className="relative w-12 h-12 flex items-center justify-center">
+                        {[...Array(12)].map((_, i) => (
+                            <div
+                                key={i}
+                                className="absolute w-1.5 h-1.5 bg-white rounded-full"
+                                style={{
+                                    transform: `rotate(${i * 30}deg) translate(20px)`,
+                                    animation: `spin 1.2s linear infinite`,
+                                    animationDelay: `${i * 0.1}s`,
+                                    opacity: 0.2
+                                }}
+                            ></div>
+                        ))}
+                    </div>
+                    <span className="text-xl font-light tracking-wide">Shutting down...</span>
+                </div>
+                <style>{`
+                    @keyframes fadeToBlack { from { opacity: 0; } to { opacity: 1; } }
+                    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                    @keyframes spin { 0% { opacity: 0.2; } 50% { opacity: 1; } 100% { opacity: 0.2; } }
+                `}</style>
+            </div>
+        )}
+    </>
     );
 };
 

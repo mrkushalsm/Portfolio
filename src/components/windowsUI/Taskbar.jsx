@@ -9,7 +9,8 @@ const Taskbar = ({
     onFocus,
     startApps = [],
     pinnedApps = [],
-    onLaunchItem // NEW prop
+    onLaunchItem,
+    onShutdown
 }) => {
     const [currentTime, setCurrentTime] = useState(null);
     const [isStartOpen, setIsStartOpen] = useState(false);
@@ -35,6 +36,7 @@ const Taskbar = ({
                 onClose={() => setIsStartOpen(false)} 
                 apps={startApps} 
                 onLaunchItem={onLaunchItem}
+                onShutdown={onShutdown}
             />
             
             <div className="absolute bottom-0 w-full h-10 bg-[#101010cc] backdrop-blur-md flex items-center justify-between z-[10000] select-none text-white border-t border-[#333]">

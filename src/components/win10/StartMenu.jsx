@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { FaUserCircle, FaCog, FaPowerOff, FaBars } from "react-icons/fa";
 
-const StartMenu = ({ isOpen, onClose, apps = [], onLaunchItem }) => {
+const StartMenu = ({ isOpen, onClose, apps = [], onLaunchItem, onShutdown }) => {
     const menuRef = useRef(null);
     const [date, setDate] = React.useState(new Date());
     const [weather, setWeather] = React.useState({ temp: '--', condition: 'Sunny', code: 0 });
@@ -97,7 +97,14 @@ const StartMenu = ({ isOpen, onClose, apps = [], onLaunchItem }) => {
                 <div className="w-10 h-10 flex items-center justify-center rounded-sm hover:bg-white/10 cursor-pointer transition-colors" title="Settings">
                      <FaCog size={16} />
                 </div>
-                <div className="w-10 h-10 flex items-center justify-center rounded-sm hover:bg-white/10 cursor-pointer transition-colors hover:text-red-400" title="Power">
+                <div 
+                    className="w-10 h-10 flex items-center justify-center rounded-sm hover:bg-white/10 cursor-pointer transition-colors hover:text-red-400" 
+                    title="Power"
+                    onClick={() => {
+                        onShutdown && onShutdown();
+                        onClose();
+                    }}
+                >
                      <FaPowerOff size={16} />
                 </div>
             </div>

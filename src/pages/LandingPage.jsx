@@ -333,10 +333,19 @@ import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
 const LoaderOverlay = () => {
     const { progress } = useProgress();
     const router = useRouter();
+    const isFromShutdown = typeof window !== "undefined" && window.location.search.includes("from=shutdown");
 
     const handleSkip = () => {
         router.push('/boot');
     };
+
+    if (isFromShutdown) {
+        return (
+            <Html center>
+                <div className="fixed inset-0 bg-black z-50"></div>
+            </Html>
+        );
+    }
 
     return (
         <Html center>
@@ -423,10 +432,17 @@ const CameraController = ({ zoomToMonitor, monitorPosition }) => {
     const { camera, scene, gl } = useThree();
     const isAnimating = useRef(false);
     const router = useRouter();
+    
+    // Store original camera position
+    const defaultPosition = useRef({ x: 0.032, y: 0.121, z: 0.5 });
+    const defaultRotation = useRef({ x: -0.521, y: 0.468, z: 0.253 });
 
     useEffect(() => {
-        camera.position.set(0.032, 0.121, 0.5);
-        camera.rotation.set(-0.521, 0.468, 0.253);
+        // Only set default position initially if NOT coming from shutdown
+        if (!window.location.search.includes("from=shutdown")) {
+            camera.position.set(defaultPosition.current.x, defaultPosition.current.y, defaultPosition.current.z);
+            camera.rotation.set(defaultRotation.current.x, defaultRotation.current.y, defaultRotation.current.z);
+        }
     }, [camera]);
 
     useEffect(() => {
@@ -443,6 +459,7 @@ const CameraController = ({ zoomToMonitor, monitorPosition }) => {
         gl.toneMappingExposure = 1.2;
     }, [gl]);
 
+    // Handle Zoom IN (Boot logic)
     useEffect(() => {
         if (zoomToMonitor && monitorPosition && !isAnimating.current) {
             isAnimating.current = true;
@@ -471,6 +488,45 @@ const CameraController = ({ zoomToMonitor, monitorPosition }) => {
             });
         }
     }, [zoomToMonitor, monitorPosition, camera, router]);
+
+    // Handle Zoom OUT (Shutdown logic)
+    useEffect(() => {
+        if (monitorPosition && window.location.search.includes("from=shutdown") && !isAnimating.current) {
+            isAnimating.current = true;
+
+            // 1. Instantly snap to the monitor
+            camera.position.set(
+                monitorPosition.x + 0.11, 
+                monitorPosition.y, 
+                monitorPosition.z
+            );
+            camera.rotation.set(0, 1.65, 0);
+
+            // 2. Clear URL so refresh doesn't replay animation
+            window.history.replaceState({}, document.title, window.location.pathname);
+
+            // 3. Animate back to default room view
+            setTimeout(() => {
+                gsap.to(camera.position, {
+                    x: defaultPosition.current.x,
+                    y: defaultPosition.current.y,
+                    z: defaultPosition.current.z,
+                    duration: 2.0,
+                    ease: "power2.inOut",
+                });
+                gsap.to(camera.rotation, {
+                    x: defaultRotation.current.x,
+                    y: defaultRotation.current.y,
+                    z: defaultRotation.current.z,
+                    duration: 2.0,
+                    ease: "power2.inOut",
+                    onComplete: () => {
+                        isAnimating.current = false;
+                    }
+                });
+            }, 500); // slight delay before zooming out makes it feel natural
+        }
+    }, [monitorPosition, camera]);
 
     return null;
 };
