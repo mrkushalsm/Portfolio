@@ -1,7 +1,7 @@
 // WindowsPhoneUI.jsx - Main Windows Phone UI container
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import StartScreen from "./StartScreen";
 import AppList from "./AppList";
@@ -16,6 +16,8 @@ import Projects from "../../pages/windowsUI/Projects";
 import Certificates from "../../pages/windowsUI/Certificates";
 import Terminal from "../windowsUI/Terminal";
 import GitHubTaskManager from "../win10/GitHubTaskManager";
+import WPFileExplorer from "./WPFileExplorer";
+import WPPhotos from "./WPPhotos";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const CARRIER_NAME = "Airtel"; // Variable: replace with carrier name when ready
@@ -30,6 +32,8 @@ const APP_REGISTRY = {
     Certificates: { component: Certificates,     title: "certificates" },
     Terminal:     { component: Terminal,         title: "terminal" },
     TaskManager:  { component: GitHubTaskManager, title: "task manager" },
+    FileExplorer: { component: WPFileExplorer,   title: "files" },
+    Photos:       { component: WPPhotos,         title: "photos" },
 };
 
 // ─── Status Bar ───────────────────────────────────────────────────────────────
@@ -91,16 +95,25 @@ const WindowsPhoneUI = () => {
     const [view, setView] = useState("start");
     const [prevView, setPrevView] = useState(null);
     const [activeApp, setActiveApp] = useState(null);
+    const [appStack, setAppStack] = useState([]);
+    const appBackHandlerRef = useRef(null);
 
     const navigateTo = (newView) => {
         setPrevView(view);
         setView(newView);
     };
 
-    const openApp = (id, label, componentKey) => {
+    const openApp = (id, label, componentKey, appProps = {}) => {
         const registered = APP_REGISTRY[componentKey];
         if (registered) {
-            setActiveApp({ id, title: label, component: registered.component });
+            const newApp = { id, title: label, component: registered.component, appProps };
+            if (view === "app") {
+                setAppStack(prev => [...prev, activeApp]);
+            } else {
+                setAppStack([]);
+            }
+            appBackHandlerRef.current = null; // reset handler for new app
+            setActiveApp(newApp);
         }
         setPrevView(view);
         setView("app");
@@ -108,7 +121,23 @@ const WindowsPhoneUI = () => {
 
     const goBack = () => {
         if (view === "app") {
+            // Check if app intercepts back
+            if (appBackHandlerRef.current && appBackHandlerRef.current()) {
+                return; // Handled by app
+            }
+            
+            // If we have a stack, pop it
+            if (appStack.length > 0) {
+                const prevApp = appStack[appStack.length - 1];
+                setAppStack(prev => prev.slice(0, -1));
+                appBackHandlerRef.current = null; // reset handler
+                setActiveApp(prevApp);
+                return;
+            }
+
+            // Otherwise, exit app
             setActiveApp(null);
+            appBackHandlerRef.current = null;
             navigateTo(prevView === "applist" ? "applist" : "start");
         } else if (view === "applist") {
             navigateTo("start");
@@ -116,6 +145,8 @@ const WindowsPhoneUI = () => {
     };
 
     const goHome = () => {
+        setAppStack([]);
+        appBackHandlerRef.current = null;
         setActiveApp(null);
         navigateTo("start");
     };
@@ -223,6 +254,8 @@ const WindowsPhoneUI = () => {
                                 app={activeApp}
                                 onClose={goBack}
                                 onHome={goHome}
+                                openApp={openApp}
+                                setBackHandler={(fn) => { appBackHandlerRef.current = fn; }}
                             />
                         </motion.div>
                     )}

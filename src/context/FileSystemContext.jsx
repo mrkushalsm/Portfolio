@@ -72,10 +72,10 @@ const INITIAL_FS = {
                                 icon: "downloads",
                                 children: {
                                     "installer.exe": { type: "file", fileType: "binary", icon: "exe-file" },
-                                    "funny_cat.png": { 
+                                    "funny_cat.jpeg": { 
                                         type: "file", 
                                         fileType: "image", 
-                                        url: "/C/Users/Kushal/Downloads/funny_cat.png", 
+                                        url: "/C/Users/Kushal/Downloads/funny_cat.jpeg", 
                                         icon: "file-image" 
                                     }
                                 }
@@ -87,8 +87,32 @@ const INITIAL_FS = {
                                     "Wallpaper.jpg": { 
                                         type: "file", 
                                         fileType: "image", 
-                                        url: "/C/Users/Kushal/Pictures/Wallpaper.jpg", 
+                                        url: "/assets/wallpaper.jpg", 
                                         icon: "file-image" 
+                                    },
+                                    "cat_on_car.jpeg": {
+                                        type: "file",
+                                        fileType: "image",
+                                        url: "/C/Users/Kushal/Pictures/cat_on_car.jpeg",
+                                        icon: "file-image"
+                                    },
+                                    "cat_on_mat.jpeg": {
+                                        type: "file",
+                                        fileType: "image",
+                                        url: "/C/Users/Kushal/Pictures/cat_on_mat.jpeg",
+                                        icon: "file-image"
+                                    },
+                                    "cute_kitten.jpeg": {
+                                        type: "file",
+                                        fileType: "image",
+                                        url: "/C/Users/Kushal/Pictures/cute_kitten.jpeg",
+                                        icon: "file-image"
+                                    },
+                                    "kitten_on_gate.jpeg": {
+                                        type: "file",
+                                        fileType: "image",
+                                        url: "/C/Users/Kushal/Pictures/kitten_on_gate.jpeg",
+                                        icon: "file-image"
                                     }
                                 }
                             },
@@ -161,9 +185,9 @@ const populateFS = (fs) => {
                 "GitHub Repo": { type: "shortcut", target: project.github, icon: "github" }
             }
         };
-        // Also add project images to Pictures
+        // Also add project images to the project folder
         if(project.image) {
-             pics.children[`${safeName}.png`] = { type: "file", fileType: "image", content: project.image, icon: "file-image" };
+             docs.children["Projects"].children[safeName].children[`${safeName}.png`] = { type: "file", fileType: "image", content: project.image, icon: "file-image" };
         }
     });
 

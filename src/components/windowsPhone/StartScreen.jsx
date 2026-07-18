@@ -4,6 +4,8 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { MOBILE_APPS, METRO_COLORS as A } from "../../data/windowsPhoneData";
+import { useFileSystem } from "../../context/FileSystemContext";
+import { FaImages } from "react-icons/fa";
 
 // ─── Base Tile ────────────────────────────────────────────────────────────────
 const Tile = ({ color, label, icon: Icon, imgSrc, onClick, children }) => {
@@ -94,6 +96,91 @@ const DateContent = () => {
     );
 };
 
+// ─── Photos Live Tile ─────────────────────────────────────────────────────────
+const PhotosLiveTile = () => {
+    const { getDirContent } = useFileSystem();
+    const [images, setImages] = useState([]);
+
+    useEffect(() => {
+        const picsDir = getDirContent("C:/Users/Kushal/Pictures");
+        let collected = [];
+        if (picsDir) {
+            Object.values(picsDir).forEach(item => {
+                if (item.type === "file" && item.fileType === "image") {
+                    collected.push(item.url || item.content);
+                }
+            });
+        }
+        setImages(collected);
+    }, [getDirContent]);
+
+    if (images.length === 0) {
+        return (
+            <div className="absolute inset-0 flex flex-col justify-center items-center p-3">
+                <FaImages className="text-white text-3xl mb-2 opacity-80" />
+                <div className="absolute bottom-2 left-3 text-white text-sm font-semibold tracking-wide">
+                    photos
+                </div>
+            </div>
+        );
+    }
+
+    const faces = images.map((imgSrc, i) => (
+        <div key={i} className="absolute inset-0 bg-gray-800">
+            <img src={imgSrc} alt="" className="w-full h-full object-cover" />
+            <div className="absolute bottom-2 left-3 text-white text-sm font-semibold drop-shadow-md z-10">photos</div>
+        </div>
+    ));
+
+    return <CubeFlip faces={faces} />;
+};
+
+// ─── 3D Cube Flip ─────────────────────────────────────────────────────────────
+const CubeFlip = ({ faces }) => {
+    const [activeIndex, setActiveIndex] = useState(0);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setActiveIndex(prev => prev + 1);
+        }, 4000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const angle = activeIndex * -90;
+    // Approximate half the height of a 2x2 tile: 1 cell height + half a gap
+    // cell = calc((100vw - 33px) / 4)
+    const halfHeight = "calc(((100vw - 33px) / 4) + 1.5px)"; 
+
+    return (
+        <div style={{ perspective: "1000px", width: "100%", height: "100%" }}>
+            <div
+                style={{
+                    width: "100%",
+                    height: "100%",
+                    position: "relative",
+                    transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+                    transformStyle: "preserve-3d",
+                    transform: `translateZ(calc(-1 * ${halfHeight})) rotateX(${angle}deg)`
+                }}
+            >
+                {[0, 1, 2, 3].map((i) => (
+                    <div 
+                        key={i}
+                        style={{ 
+                            position: "absolute", 
+                            width: "100%", 
+                            height: "100%", 
+                            backfaceVisibility: "hidden", 
+                            transform: `rotateX(${i * 90}deg) translateZ(${halfHeight})` 
+                        }}
+                    >
+                        {faces[i % faces.length]}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 // ─── Start Screen ─────────────────────────────────────────────────────────────
 const StartScreen = ({ onOpenApp, onSwipeToList }) => {
     const containerRef = useRef(null);
@@ -105,27 +192,39 @@ const StartScreen = ({ onOpenApp, onSwipeToList }) => {
         const customTiles = [
             {
                 id: "aboutme",
-                render: () => (
-                    <Tile color={A.blue} onClick={() => onOpenApp("aboutme", "about me", "AboutMe")}>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center p-3 gap-2">
-                            <img
-                                src="/assets/profile.jpeg"
-                                alt="Profile"
-                                className="rounded-full object-cover border-2 border-white/30"
-                                style={{ width: "52px", height: "52px" }}
-                                onError={(e) => { e.target.style.display = "none"; }}
-                            />
-                            <div className="w-full text-center">
-                                <p className="text-white font-semibold leading-tight" style={{ fontSize: "14px", fontFamily: "'Segoe UI', sans-serif" }}>
-                                    Kushal S. M.
+                render: () => {
+                    const textFace = (
+                        <div className="absolute inset-0 flex flex-col justify-between p-3" style={{ background: A.blue }}>
+                            <div className="w-full text-left">
+                                <p className="text-white/80 font-light leading-tight" style={{ fontSize: "13px", fontFamily: "'Segoe UI', sans-serif" }}>
+                                    Welcome back,
                                 </p>
-                                <p className="text-blue-100 font-light lowercase" style={{ fontSize: "11px", fontFamily: "'Segoe UI', sans-serif" }}>
-                                    about me
+                            </div>
+                            <div className="w-full text-right">
+                                <p className="text-white font-semibold leading-tight mt-1" style={{ fontSize: "16px", fontFamily: "'Segoe UI', sans-serif" }}>
+                                    Kushal SM
                                 </p>
                             </div>
                         </div>
-                    </Tile>
-                ),
+                    );
+
+                    return (
+                        <Tile color={A.blue} onClick={() => onOpenApp("aboutme", "about me", "AboutMe")}>
+                            <CubeFlip 
+                                faces={[
+                                    textFace,
+                                    <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                                        <img src="/assets/profile.jpeg" alt="Profile" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = "none"; }} />
+                                    </div>,
+                                    textFace,
+                                    <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                                        <img src="/assets/icons/win10/user-icon.png" alt="Profile" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = "none"; }} />
+                                    </div>
+                                ]}
+                            />
+                        </Tile>
+                    );
+                },
             },
             {
                 id: "date",
@@ -160,11 +259,19 @@ const StartScreen = ({ onOpenApp, onSwipeToList }) => {
                     );
                 },
             },
+            {
+                id: "photos",
+                render: () => (
+                    <Tile color={A.teal} onClick={() => onOpenApp("photos", "photos", "Photos")}>
+                        <PhotosLiveTile />
+                    </Tile>
+                ),
+            },
         ];
 
         // Generate standard app tiles directly from data
         const standardAppTiles = MOBILE_APPS
-            .filter(app => app.action === "app" && app.id !== "aboutme")
+            .filter(app => app.action === "app" && app.id !== "aboutme" && app.id !== "photos")
             .map(app => ({
                 id: app.id,
                 render: () => (
