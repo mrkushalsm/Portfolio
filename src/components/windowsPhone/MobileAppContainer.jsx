@@ -27,7 +27,7 @@ const MobileAppContainer = ({ app, onClose, onHome, openApp, setBackHandler }) =
 
 
             {/* App Header (optional, usually apps render their own, but we can provide a small one) */}
-            <div 
+            {/* <div 
                 className="w-full px-4 pt-4 pb-1 shrink-0" 
                 style={{ 
                     backgroundColor: "#000000",
@@ -43,7 +43,7 @@ const MobileAppContainer = ({ app, onClose, onHome, openApp, setBackHandler }) =
                 >
                     {app?.title?.toLowerCase() || "app"}
                 </h1>
-            </div>
+            </div> */}
 
             {/* App Content */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden" style={{ paddingBottom: "52px" }}>

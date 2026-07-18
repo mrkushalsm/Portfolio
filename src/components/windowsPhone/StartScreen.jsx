@@ -229,7 +229,7 @@ const StartScreen = ({ onOpenApp, onSwipeToList }) => {
             {
                 id: "date",
                 render: () => (
-                    <Tile color={A.teal}>
+                    <Tile color={A.dark}>
                         <DateContent />
                     </Tile>
                 ),
@@ -286,15 +286,28 @@ const StartScreen = ({ onOpenApp, onSwipeToList }) => {
 
         const allTiles = [...customTiles, ...standardAppTiles];
 
-        // Separate pinned tiles from shufflable ones
-        const pinned = allTiles.filter(t => t.id === "aboutme" || t.id === "date");
-        const shufflable = allTiles.filter(t => t.id !== "aboutme" && t.id !== "date");
+        // Define a fixed, easily modifiable tile placement order by their IDs
+        const TILE_ORDER = [
+            "aboutme",
+            "date",
+            "skills",
+            "certificates",
+            "projects",
+            "resume",
+            "socials",
+            "photos",
+            "files",
+            "taskmanager",
+            "quote",
+            "terminal",
+        ];
 
-        // Shuffle the remaining tiles
-        const shuffled = shufflable.sort(() => Math.random() - 0.5);
+        // Sort allTiles based on the TILE_ORDER array
+        const orderedTiles = TILE_ORDER
+            .map(id => allTiles.find(t => t.id === id))
+            .filter(Boolean);
 
-        // Keep About Me and Date on top, shuffle the rest
-        setTiles([...pinned, ...shuffled]);
+        setTiles(orderedTiles);
     }, []);
 
     const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };

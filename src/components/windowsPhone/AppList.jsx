@@ -146,7 +146,7 @@ const AppList = ({ onOpenApp, onBack }) => {
                                         className="w-9 h-9 flex items-center justify-center shrink-0"
                                         style={{ background: app.color }}
                                     >
-                                        <Icon className="text-white text-lg" />
+                                        <Icon className={`text-lg ${app.color === "#ffffff" ? "text-black" : "text-white"}`} />
                                     </div>
                                     {/* App Name */}
                                     <span

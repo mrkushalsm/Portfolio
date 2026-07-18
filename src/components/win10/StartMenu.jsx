@@ -197,7 +197,9 @@ const StartMenu = ({ isOpen, onClose, apps = [], onLaunchItem, onShutdown }) => 
                         className="col-span-2 bg-black p-3 flex flex-col items-center justify-center gap-2 hover:bg-[#2b3137] cursor-pointer transition-colors"
                         onClick={() => window.open("https://x.com/mrkushalsm", "_blank")}
                     >
-                         <img src="/assets/icons/win10/x-twitter.png" className="w-8 h-8 bg-white rounded-lg" alt="X"/>
+                        <div className="bg-white rounded-lg">
+                            <img src="/assets/icons/win10/x-twitter.png" className="w-8 h-8" alt="X"/>
+                        </div>
                          <span className="text-xs font-medium">X</span>
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 const profilePic = "/assets/profile.jpeg";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -6,8 +6,86 @@ import { FaXTwitter } from "react-icons/fa6";
 import { educationData } from "../../data/educationData";
 import { experienceData } from "../../data/experienceData";
 
-const AboutMe = () => {
+const AboutMe = ({ setBackHandler }) => {
+    const isMobile = Boolean(setBackHandler);
     const [activeTab, setActiveTab] = useState("profile"); // 'profile', 'education', 'experience'
+
+    useEffect(() => {
+        if (isMobile && setBackHandler) {
+            setBackHandler(() => false);
+        }
+        return () => { if (isMobile && setBackHandler) setBackHandler(null); };
+    }, [isMobile, setBackHandler]);
+
+    if (isMobile) {
+        return (
+            <div className="w-full h-full bg-black text-white p-4 font-sans select-none overflow-x-hidden overflow-y-auto pb-8">
+                <h1 className="text-[54px] font-light leading-none tracking-tight mb-8 lowercase text-[#0078d7] break-words" style={{ marginLeft: "-4px" }}>
+                    about me
+                </h1>
+
+                {/* Profile section */}
+                <div className="flex flex-col gap-6 mb-12">
+                    <img src={profilePic} alt="Profile" className="w-full h-64 object-cover opacity-90" />
+                    <div>
+                        <h2 className="text-4xl font-normal tracking-wide">Kushal S. M.</h2>
+                        <p className="text-[#0078d7] text-xl mt-1 lowercase">Frontend Developer</p>
+                    </div>
+                    <p className="text-white/80 text-lg font-light leading-snug">
+                        Passionate about creating beautiful, user-friendly interfaces.
+                        Skilled in React, Tailwind CSS, and modern web technologies.
+                        Always eager to learn and build something new!
+                    </p>
+                    <div className="flex gap-4 mt-2">
+                        <a href="https://github.com/mrkushalsm" target="_blank" rel="noopener noreferrer" className="p-3 bg-[#252525] text-white active:bg-white active:text-black transition-colors">
+                            <FaGithub className="text-2xl" />
+                        </a>
+                        <a href="https://www.linkedin.com/in/mrkushalsm/" target="_blank" rel="noopener noreferrer" className="p-3 bg-[#0078d7] text-white active:bg-white active:text-[#0078d7] transition-colors">
+                            <FaLinkedin className="text-2xl" />
+                        </a>
+                        <a href="https://x.com/mrkushalsm" target="_blank" rel="noopener noreferrer" className="p-3 bg-white text-black active:bg-black active:text-white transition-colors border border-white">
+                            <FaXTwitter className="text-2xl" />
+                        </a>
+                    </div>
+                </div>
+
+                {/* Education section */}
+                <h2 className="text-[32px] font-light tracking-tight mb-6 lowercase text-[#0078d7]">education</h2>
+                <div className="flex flex-col mb-12 relative pl-6 border-l-2 border-[#0078d7]/30">
+                    {educationData.map((item, index) => (
+                        <div key={index} className="relative pb-8 last:pb-0">
+                            {/* Timeline Node */}
+                            <div className="absolute -left-[31px] top-1.5 w-3 h-3 bg-black border-2 border-[#0078d7]"></div>
+                            
+                            <div className="flex flex-col gap-1">
+                                <p className="text-[#0078d7] text-sm font-semibold tracking-wider uppercase">{item.period}</p>
+                                <h3 className="text-2xl font-normal tracking-wide">{item.title}</h3>
+                                <p className="text-white/60 text-md">{item.badge}</p>
+                                <p className="text-white/80 text-md font-light leading-snug mt-2">{item.description}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Experience section */}
+                <h2 className="text-[32px] font-light tracking-tight mb-6 lowercase text-[#0078d7]">experience</h2>
+                <div className="flex flex-col relative pl-6 border-l-2 border-[#0078d7]/30">
+                    {experienceData.map((item, index) => (
+                        <div key={index} className="relative pb-8 last:pb-0">
+                            {/* Timeline Node */}
+                            <div className="absolute -left-[31px] top-1.5 w-3 h-3 bg-black border-2 border-[#0078d7]"></div>
+                            
+                            <div className="flex flex-col gap-1">
+                                <p className="text-[#0078d7] text-sm font-semibold tracking-wider uppercase">{item.period}</p>
+                                <h3 className="text-2xl font-normal tracking-wide">{item.title}</h3>
+                                <p className="text-white/60 text-md">{item.organization} - {item.type}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col h-full bg-gray-50">
@@ -54,7 +132,7 @@ const AboutMe = () => {
                             <a href="https://www.linkedin.com/in/mrkushalsm/" target="_blank" rel="noopener noreferrer" className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-500 hover:-translate-y-1 transition-all shadow-md">
                                 <FaLinkedin className="text-xl" />
                             </a>
-                            <a href="https://x.com/kspiderman69" target="_blank" rel="noopener noreferrer" className="p-2 bg-black text-white rounded-full hover:bg-gray-900 hover:-translate-y-1 transition-all shadow-md">
+                            <a href="https://x.com/mrkushalsm" target="_blank" rel="noopener noreferrer" className="p-2 bg-black text-white rounded-full hover:bg-gray-900 hover:-translate-y-1 transition-all shadow-md">
                                 <FaXTwitter className="text-xl" />
                             </a>
                         </div>

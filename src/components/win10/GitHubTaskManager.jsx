@@ -101,8 +101,8 @@ const ContributionHeatmap = ({ contributions }) => {
     const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     return (
-        <div className="p-3 bg-[#0d1117]" style={{ overflow: "visible" }}>
-            <div className="flex gap-[2px]">
+        <div className="p-3 bg-[#0d1117] overflow-x-auto overflow-y-hidden">
+            <div className="flex gap-[2px] min-w-max pb-1">
                 {/* Day labels column */}
                 <div className="flex flex-col gap-[2px] mr-1 shrink-0">
                     {dayLabels.map((d, i) => (
