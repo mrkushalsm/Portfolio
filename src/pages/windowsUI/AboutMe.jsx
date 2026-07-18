@@ -87,18 +87,19 @@ const AboutMe = ({ setBackHandler }) => {
         );
     }
 
+    // ORIGINAL DESKTOP CODE - NOW DARK MODE
     return (
-        <div className="flex flex-col h-full bg-gray-50">
+        <div className="flex flex-col h-full bg-[#1e1e1e] text-gray-200">
             {/* Tab Navigation */}
-            <div className="flex border-b border-gray-200 bg-white sticky top-0 z-10">
+            <div className="flex border-b border-[#333] bg-[#252525] sticky top-0 z-10">
                 {["profile", "education", "experience"].map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`flex-1 py-3 text-sm font-medium capitalize transition-colors cursor-pointer
+                        className={`flex-1 py-3 text-sm font-semibold tracking-wide capitalize transition-colors cursor-pointer
                             ${activeTab === tab 
-                                ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50" 
-                                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                                ? "text-white border-b-2 border-[#4da8da] bg-[#333]" 
+                                : "text-gray-400 hover:text-gray-200 hover:bg-[#2a2a2a]"
                             }`}
                     >
                         {tab}
@@ -107,33 +108,33 @@ const AboutMe = ({ setBackHandler }) => {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
                 
                 {/* Profile Tab */}
                 {activeTab === "profile" && (
                     <div className="flex flex-col items-center text-center animate-fadeIn">
-                        <img src={profilePic} alt="Profile" className="w-40 h-40 object-cover rounded-full mb-4 border-4 border-white shadow-lg" />
+                        <img src={profilePic} alt="Profile" className="w-40 h-40 object-cover rounded-full mb-6 border-4 border-[#333] shadow-lg" />
                         
-                        <h2 className="text-xl font-bold text-gray-800">Kushal S. M.</h2>
-                        <p className="text-sm font-medium text-blue-600 mb-4">Frontend Developer | UI Enthusiast</p>
+                        <h2 className="text-2xl font-bold text-white tracking-wide">Kushal S. M.</h2>
+                        <p className="text-md font-medium text-[#4da8da] mb-6 tracking-wide">Frontend Developer | UI Enthusiast</p>
                         
-                        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 w-full max-w-sm">
-                            <p className="text-sm text-gray-600 leading-relaxed">
+                        <div className="bg-[#2a2a2a] p-5 rounded-lg shadow-md border border-[#444] w-full max-w-md">
+                            <p className="text-sm text-gray-300 leading-relaxed font-light">
                                 Passionate about creating beautiful, user-friendly interfaces.
                                 Skilled in React, Tailwind CSS, and modern web technologies.
                                 Always eager to learn and build something new!
                             </p>
                         </div>
 
-                        <div className="flex gap-4 mt-6">
-                            <a href="https://github.com/mrkushalsm" target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 text-white rounded-full hover:bg-gray-700 hover:-translate-y-1 transition-all shadow-md">
-                                <FaGithub className="text-xl" />
+                        <div className="flex gap-5 mt-8">
+                            <a href="https://github.com/mrkushalsm" target="_blank" rel="noopener noreferrer" className="p-3 bg-[#333] text-white rounded-full hover:bg-[#444] hover:-translate-y-1 transition-all shadow-md border border-[#444]">
+                                <FaGithub className="text-2xl" />
                             </a>
-                            <a href="https://www.linkedin.com/in/mrkushalsm/" target="_blank" rel="noopener noreferrer" className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-500 hover:-translate-y-1 transition-all shadow-md">
-                                <FaLinkedin className="text-xl" />
+                            <a href="https://www.linkedin.com/in/mrkushalsm/" target="_blank" rel="noopener noreferrer" className="p-3 bg-[#0a66c2] text-white rounded-full hover:bg-[#004182] hover:-translate-y-1 transition-all shadow-md">
+                                <FaLinkedin className="text-2xl" />
                             </a>
-                            <a href="https://x.com/mrkushalsm" target="_blank" rel="noopener noreferrer" className="p-2 bg-black text-white rounded-full hover:bg-gray-900 hover:-translate-y-1 transition-all shadow-md">
-                                <FaXTwitter className="text-xl" />
+                            <a href="https://x.com/mrkushalsm" target="_blank" rel="noopener noreferrer" className="p-3 bg-black text-white rounded-full hover:bg-[#111] hover:-translate-y-1 transition-all shadow-md border border-[#444]">
+                                <FaXTwitter className="text-2xl" />
                             </a>
                         </div>
                     </div>
@@ -141,24 +142,24 @@ const AboutMe = ({ setBackHandler }) => {
 
                 {/* Education Tab */}
                 {activeTab === "education" && (
-                    <div className="space-y-6 px-2 animate-fadeIn">
+                    <div className="space-y-6 px-4 max-w-2xl mx-auto animate-fadeIn">
                         {educationData.map((item, index) => (
-                            <div key={index} className="relative pl-8 border-l-2 border-blue-200 last:border-l-0 pb-6 last:pb-0">
+                            <div key={index} className="relative pl-8 border-l-2 border-[#333] last:border-l-0 pb-6 last:pb-0">
                                 {/* Timeline Dot */}
-                                <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-500 border-4 border-white shadow-sm ring-1 ring-blue-100"></div>
+                                <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-[#4da8da] border-4 border-[#1e1e1e] shadow-sm"></div>
                                 
-                                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                                <div className="bg-[#2a2a2a] p-5 rounded-lg shadow-md border border-[#444] hover:border-[#555] transition-colors">
                                     <div className="flex justify-between items-start gap-4">
                                         <div>
-                                            <span className="inline-block px-2 py-1 mb-2 text-xs font-semibold text-blue-600 bg-blue-50 rounded-full">
+                                            <span className="inline-block px-2 py-1 mb-3 text-xs font-semibold text-[#4da8da] bg-[#1e1e1e] border border-[#333] rounded-sm">
                                                 {item.period}
                                             </span>
-                                            <h3 className="text-lg font-bold text-gray-800">{item.title}</h3>
-                                            <p className="text-sm font-medium text-gray-500 mb-2">{item.badge}</p>
-                                            <p className="text-sm text-gray-600">{item.description}</p>
+                                            <h3 className="text-lg font-bold text-white mb-1">{item.title}</h3>
+                                            <p className="text-sm font-medium text-gray-400 mb-3">{item.badge}</p>
+                                            <p className="text-sm text-gray-300 font-light leading-relaxed">{item.description}</p>
                                         </div>
                                         {item.image && (
-                                            <img src={item.image} alt={item.title} className="w-32 h-20 object-contain rounded-md bg-gray-50 p-1 shrink-0" />
+                                            <img src={item.image} alt={item.title} className="w-32 h-20 object-contain rounded-md bg-white p-2 shrink-0 shadow-sm" />
                                         )}
                                     </div>
                                 </div>
@@ -169,24 +170,24 @@ const AboutMe = ({ setBackHandler }) => {
 
                 {/* Experience Tab */}
                 {activeTab === "experience" && (
-                    <div className="space-y-6 px-2 animate-fadeIn">
+                    <div className="space-y-6 px-4 max-w-2xl mx-auto animate-fadeIn">
                         {experienceData.map((item, index) => (
-                            <div key={index} className="relative pl-8 border-l-2 border-purple-200 last:border-l-0 pb-6 last:pb-0">
+                            <div key={index} className="relative pl-8 border-l-2 border-[#333] last:border-l-0 pb-6 last:pb-0">
                                 {/* Timeline Dot */}
-                                <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-purple-500 border-4 border-white shadow-sm ring-1 ring-purple-100"></div>
+                                <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-[#9b59b6] border-4 border-[#1e1e1e] shadow-sm"></div>
                                 
-                                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                                    <div className="flex justify-between items-start">
+                                <div className="bg-[#2a2a2a] p-5 rounded-lg shadow-md border border-[#444] hover:border-[#555] transition-colors">
+                                    <div className="flex justify-between items-start gap-4">
                                         <div>
-                                            <span className="inline-block px-2 py-1 mb-2 text-xs font-semibold text-purple-600 bg-purple-50 rounded-full">
+                                            <span className="inline-block px-2 py-1 mb-3 text-xs font-semibold text-[#9b59b6] bg-[#1e1e1e] border border-[#333] rounded-sm">
                                                 {item.period}
                                             </span>
-                                            <h3 className="text-lg font-bold text-gray-800">{item.title}</h3>
-                                            <p className="text-sm font-medium text-gray-500">{item.organization}</p>
-                                            <p className="text-xs text-gray-400 mt-1">{item.type}</p>
+                                            <h3 className="text-lg font-bold text-white mb-1">{item.title}</h3>
+                                            <p className="text-sm font-medium text-gray-400">{item.organization}</p>
+                                            <p className="text-xs text-gray-500 mt-1">{item.type}</p>
                                         </div>
                                         {item.image && (
-                                            <img src={item.image} alt={item.title} className="w-20 h-20 object-contain rounded-full bg-white shadow-sm border border-gray-100 p-1" />
+                                            <img src={item.image} alt={item.title} className="w-20 h-20 object-contain rounded-full bg-white shadow-sm border border-gray-200 p-2 shrink-0" />
                                         )}
                                     </div>
                                 </div>
