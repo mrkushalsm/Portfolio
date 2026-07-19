@@ -7,6 +7,7 @@ import StartScreen from "./StartScreen";
 import AppList from "./AppList";
 import MobileAppContainer from "./MobileAppContainer";
 import NavigationBar from "./NavigationBar";
+import MetroSearch from "./MetroSearch";
 
 // ─── App Components ──────────────────────────────────────────────────────────
 import AboutMe from "../../pages/windowsUI/AboutMe";
@@ -97,8 +98,10 @@ const WindowsPhoneUI = () => {
     const [activeApp, setActiveApp] = useState(null);
     const [appStack, setAppStack] = useState([]);
     const appBackHandlerRef = useRef(null);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     const navigateTo = (newView) => {
+        if (isSearchOpen) setIsSearchOpen(false);
         setPrevView(view);
         setView(newView);
     };
@@ -115,11 +118,17 @@ const WindowsPhoneUI = () => {
             appBackHandlerRef.current = null; // reset handler for new app
             setActiveApp(newApp);
         }
+        if (isSearchOpen) setIsSearchOpen(false);
         setPrevView(view);
         setView("app");
     };
 
     const goBack = () => {
+        if (isSearchOpen) {
+            setIsSearchOpen(false);
+            return;
+        }
+
         if (view === "app") {
             // Check if app intercepts back
             if (appBackHandlerRef.current && appBackHandlerRef.current()) {
@@ -145,36 +154,28 @@ const WindowsPhoneUI = () => {
     };
 
     const goHome = () => {
-        setAppStack([]);
-        appBackHandlerRef.current = null;
+        if (isSearchOpen) setIsSearchOpen(false);
         setActiveApp(null);
         navigateTo("start");
+        appBackHandlerRef.current = null;
     };
 
-    // Windows button: start→applist, applist→start, app→start
     const handleWindowsBtn = () => {
-        if (view === "app") {
-            setActiveApp(null);
-            navigateTo("start");
-        } else if (view === "start") {
-            navigateTo("applist");
+        if (isSearchOpen) setIsSearchOpen(false);
+        if (view === "start") {
+            // Already home, do nothing or toggle
         } else {
-            navigateTo("start");
+            goHome();
         }
     };
 
-    // Determine slide direction
-    const slideDirection = () => {
-        if (view === "app") return "right";
-        if (view === "applist") {
-            return prevView === "start" ? "right" : "left";
-        }
-        return "left"; // going back to start
-    };
-
-    const dir = slideDirection();
-    const enterVariant = dir === "right" ? "enterFromRight" : "enterFromLeft";
-    const exitVariant  = dir === "right" ? "exitToLeft"    : "exitToRight";
+    const enterVariant = prevView === "start" && view === "applist" ? "enterFromRight" : 
+                         prevView === "applist" && view === "start" ? "enterFromLeft" :
+                         view === "app" ? "enterFromRight" : "enterFromLeft";
+                         
+    const exitVariant = view === "applist" && prevView === "start" ? "exitToLeft" : 
+                        view === "start" && prevView === "applist" ? "exitToRight" :
+                        prevView === "app" ? "exitToRight" : "exitToLeft";
 
     return (
         <div
@@ -243,7 +244,7 @@ const WindowsPhoneUI = () => {
                     {view === "app" && activeApp && (
                         <motion.div
                             key={`app-${activeApp.id}`}
-                            className="absolute inset-0 flex flex-col"
+                            className="absolute inset-0 flex flex-col bg-black z-20"
                             variants={slideVariants}
                             initial="enterFromRight"
                             animate="center"
@@ -256,6 +257,26 @@ const WindowsPhoneUI = () => {
                                 onHome={goHome}
                                 openApp={openApp}
                                 setBackHandler={(fn) => { appBackHandlerRef.current = fn; }}
+                                onSearch={() => setIsSearchOpen(true)}
+                            />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Metro Search Overlay (above apps but below nav bar ideally) */}
+                <AnimatePresence>
+                    {isSearchOpen && (
+                        <motion.div
+                            key="metro-search"
+                            className="absolute inset-0 z-[10000] bg-black"
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: 10, opacity: 0 }}
+                            transition={{ type: "tween", duration: 0.15, ease: "easeOut" }}
+                        >
+                            <MetroSearch 
+                                onClose={() => setIsSearchOpen(false)} 
+                                onLaunchApp={openApp} 
                             />
                         </motion.div>
                     )}
@@ -265,7 +286,12 @@ const WindowsPhoneUI = () => {
             {/* Global Navigation Bar (only shown when NOT in an app — MobileAppContainer has its own) */}
             {view !== "app" && (
                 <div className="relative z-10">
-                    <NavigationBar onBack={goBack} onHome={goHome} onWindowsBtn={handleWindowsBtn} />
+                    <NavigationBar 
+                        onBack={goBack} 
+                        onHome={goHome} 
+                        onWindowsBtn={handleWindowsBtn} 
+                        onSearch={() => setIsSearchOpen(true)}
+                    />
                 </div>
             )}
         </div>

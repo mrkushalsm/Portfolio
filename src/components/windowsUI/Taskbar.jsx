@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaWifi, FaBatteryFull, FaVolumeUp, FaChevronUp, FaSearch } from "react-icons/fa";
 import StartMenu from "../win10/StartMenu";
+import { useGlobalSearch } from "../../hooks/useGlobalSearch";
+import Win10Search from "./Win10Search";
 
 const Taskbar = ({ 
     windows = [], 
@@ -14,6 +16,22 @@ const Taskbar = ({
 }) => {
     const [currentTime, setCurrentTime] = useState(null);
     const [isStartOpen, setIsStartOpen] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const searchRef = useRef(null);
+    const searchCtx = useGlobalSearch();
+    const { query } = searchCtx;
+
+    // Close search when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (searchRef.current && !searchRef.current.contains(e.target)) {
+                setIsSearchOpen(false);
+            }
+        };
+        if (isSearchOpen) document.addEventListener("mousedown", handleClickOutside);
+        else document.removeEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [isSearchOpen]);
 
     useEffect(() => {
         setCurrentTime(new Date());
@@ -39,6 +57,14 @@ const Taskbar = ({
                 onShutdown={onShutdown}
             />
             
+            <Win10Search 
+                isSearchOpen={isSearchOpen}
+                onClose={() => setIsSearchOpen(false)}
+                onLaunchItem={onLaunchItem}
+                searchRef={searchRef}
+                {...searchCtx}
+            />
+
             <div className="absolute bottom-0 w-full h-10 bg-[#101010cc] backdrop-blur-md flex items-center justify-between z-[10000] select-none text-white border-t border-[#333]">
                 {/* Left Section: Start & Search */}
                 <div className="flex items-center h-full">
@@ -53,13 +79,22 @@ const Taskbar = ({
                     </div>
 
                     {/* Search Bar */}
-                    <div className="hidden md:flex items-center h-full">
-                        <div className="flex items-center bg-white h-full w-[20rem] px-3 border border-[#333] hover:border-[#666] focus-within:border-[#0078d7] transition-colors">
+                    <div className="hidden md:flex items-center h-full cursor-text group taskbar-search-bar" onClick={(e) => {
+                        setIsSearchOpen(true);
+                        const input = e.currentTarget.querySelector('input');
+                        if (input) input.focus();
+                    }}>
+                        <div className="flex items-center bg-white h-full w-[20rem] px-3 border border-[#333] hover:border-[#666] group-focus-within:border-[#0078d7] transition-colors">
                             <FaSearch className="text-gray-500 mr-3 w-3 h-3" />
                             <input 
                                 type="text" 
                                 placeholder="Type here to search" 
                                 className="bg-transparent border-none outline-none text-black text-xs w-full placeholder-gray-500 font-normal"
+                                value={query}
+                                onChange={(e) => {
+                                    if (!isSearchOpen) setIsSearchOpen(true);
+                                    searchCtx.setQuery(e.target.value);
+                                }}
                             />
                         </div>
                     </div>

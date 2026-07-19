@@ -4,7 +4,7 @@
 import React, { useEffect } from "react";
 import NavigationBar from "./NavigationBar";
 
-const MobileAppContainer = ({ app, onClose, onHome, openApp, setBackHandler }) => {
+const MobileAppContainer = ({ app, onClose, onHome, openApp, setBackHandler, onSearch }) => {
     // Prevent body scroll while app is open
     useEffect(() => {
         document.body.style.overflow = "hidden";
@@ -51,7 +51,7 @@ const MobileAppContainer = ({ app, onClose, onHome, openApp, setBackHandler }) =
             </div>
 
             {/* Navigation Bar */}
-            <NavigationBar onBack={onClose} onHome={onHome} />
+            <NavigationBar onBack={onClose} onHome={onHome} onSearch={onSearch} />
         </div>
     );
 };

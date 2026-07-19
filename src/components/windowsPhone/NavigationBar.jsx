@@ -18,12 +18,16 @@ const SearchIcon = () => (
 );
 
 // onWindowsBtn: called when Windows button is pressed (handles start ↔ applist toggle)
-const NavigationBar = ({ onBack, onHome, onWindowsBtn }) => {
+const NavigationBar = ({ onBack, onHome, onWindowsBtn, onSearch }) => {
     const [showToast, setShowToast] = useState(false);
 
     const handleSearch = () => {
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 2000);
+        if (onSearch) {
+            onSearch();
+        } else {
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 2000);
+        }
     };
 
     const handleWindows = () => {

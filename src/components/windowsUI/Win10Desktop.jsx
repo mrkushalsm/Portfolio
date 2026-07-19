@@ -127,6 +127,29 @@ const Win10Desktop = () => {
 
     // File Open Handler
     const handleFileOpen = (name, item) => {
+        // Intercept search result object from Win10Search
+        if (typeof name === 'object' && name !== null && name.type) {
+            const res = name;
+            if (res.type === 'app') {
+                // Map known apps to their file actions
+                if (res.id === 'projects') return handleFileOpen('Projects', { type: 'folder', path: 'C:/Users/Kushal/Documents/Projects' });
+                if (res.id === 'certificates') return handleFileOpen('Certificates', { type: 'folder', path: 'C:/Users/Kushal/Documents/Certificates' });
+                if (res.id === 'skills') return handlePinnedLaunch('Skills.md');
+                if (res.id === 'resume') return handlePinnedLaunch('Resume.pdf');
+                if (res.id === 'aboutme') return handleFileOpen('About Me.md', { type: 'markdown', fileType: 'markdown', content: 'about-me' });
+                if (res.id === 'terminal') return handleFileOpen('Terminal', { type: 'file', fileType: 'app', appName: 'Terminal' });
+                if (res.id === 'taskmanager') return handleFileOpen('Task Manager', { type: 'file', fileType: 'app', appName: 'Task Manager' });
+                if (res.id === 'files') return handleFileOpen('File Explorer', { type: 'file', fileType: 'app', appName: 'File Explorer' });
+                
+                // Fallback for unknown apps
+                return handleFileOpen(res.title, { type: 'file', fileType: 'app', appName: res.title });
+            } else if (res.type === 'file') {
+                return handleFileOpen(res.title, res.content);
+            }
+        }
+
+        if (!item) return; // Guard against undefined item
+
         if (item.type === 'folder' || item.type === 'drive') {
             // Use provided path or default to Desktop 
             const path = item.path || `C:/Users/Kushal/Desktop/${name}`; 
