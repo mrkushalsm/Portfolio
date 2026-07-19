@@ -192,7 +192,7 @@ const WindowsPhoneUI = () => {
                     backgroundImage: `url(${WALLPAPER})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
-                    filter: "blur(18px) brightness(0.45)",
+                    filter: "brightness(0.9)",
                     transform: "scale(1.1)", // avoids blur edges showing
                 }}
             />
