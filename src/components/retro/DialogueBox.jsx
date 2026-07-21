@@ -72,25 +72,18 @@ const DialogueBox = ({ lines = [], onComplete, onSkip }) => {
   return (
     <div className={styles.dialogueOverlay}>
       <div className={styles.dialogueBox} onClick={handleAdvance}>
-        <p className={styles.dialogueText}>{displayed}</p>
-        <div className={styles.dialogueFooter}>
-          {isDone && lineIndex < lines.length - 1 && (
-            <span className={styles.dialogueArrow}>▼</span>
-          )}
-          {isDone && lineIndex === lines.length - 1 && (
-            <span className={styles.dialogueArrow}>■</span>
-          )}
-          {!isDone && <span style={{ opacity: 0 }}>■</span>}
-          <button
-            className={styles.dialogueSkip}
-            onClick={(e) => {
-              e.stopPropagation();
-              onSkip?.();
-            }}
-          >
-            SKIP ▶
-          </button>
-        </div>
+        <p className={styles.dialogueText}>
+          {displayed}{isDone && lineIndex < lines.length - 1 && <span className={styles.dialogueArrow}> ▼</span>}{isDone && lineIndex === lines.length - 1 && <span className={styles.dialogueArrow}> ■</span>}
+        </p>
+        <button
+          className={styles.dialogueSkip}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSkip?.();
+          }}
+        >
+          SKIP <span className={styles.skipArrow}>▶</span>
+        </button>
       </div>
     </div>
   );

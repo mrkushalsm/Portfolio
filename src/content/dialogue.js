@@ -21,9 +21,3 @@ export const INTRO_DIALOGUE = [
 export const CONTINUE_DIALOGUE = [
   "1 item was deposited...\njust kidding, welcome back!",
 ];
-
-// ── Mystery Gift dialog ────────────────────────────────────────────────────
-export const MYSTERY_GIFT_DIALOGUE = [
-  "You received a MYSTERY GIFT!",
-  "A RÉSUMÉ and CONTACT CARD\nwere added to your bag!",
-];

@@ -200,7 +200,7 @@ const RetroShell = () => {
           className={styles.cutsceneSkip}
           onClick={handleCutsceneComplete}
         >
-          SKIP ▶
+          SKIP <span className={styles.skipArrow}>▶</span>
         </button>
       )}
 
@@ -225,22 +225,24 @@ const RetroShell = () => {
       {gameState === "exploring" && (
         <div
           style={{
-            position: "fixed",
+            position: "absolute",
             bottom: 20,
             left: "50%",
             transform: "translateX(-50%)",
             fontFamily: "var(--font-press-start), monospace",
-            fontSize: "clamp(6px, 0.8vw, 9px)",
-            color: "var(--retro-muted)",
-            background: "var(--retro-box-bg)",
-            border: "1px solid var(--retro-border)",
-            padding: "8px 18px",
+            fontSize: "clamp(8px, 1vw, 12px)",
+            color: "#2860d8",
+            background: "#f8f8f8",
+            border: "3px solid #7090b8",
+            borderRadius: "16px",
+            boxShadow: "0 0 0 2px #383838, inset 0 0 0 2px #383838, 0 8px 16px rgba(0,0,0,0.4)",
+            padding: "10px 20px",
             letterSpacing: 1,
             zIndex: 10,
             pointerEvents: "none",
           }}
         >
-          CLICK TO LOOK · WASD TO MOVE · ESC TO RELEASE
+          CLICK TO LOOK <span className={styles.dialogueBall}>●</span> WASD TO MOVE <span className={styles.dialogueBall}>●</span> ESC TO RELEASE
         </div>
       )}
 

@@ -16,10 +16,8 @@ import { SITE_CONFIG } from "../../config";
 import styles from "./retro.module.css";
 
 const MENU_ITEMS = [
-  { id: "new_game", label: "NEW GAME", alwaysEnabled: true },
   { id: "continue", label: "CONTINUE", alwaysEnabled: false },
-  { id: "mystery_gift", label: "MYSTERY GIFT", alwaysEnabled: true },
-  { id: "options", label: "OPTIONS", alwaysEnabled: true },
+  { id: "new_game", label: "NEW GAME", alwaysEnabled: true },
 ];
 
 const TitleScreen = ({ hasVisited, onSelect }) => {
@@ -78,58 +76,93 @@ const TitleScreen = ({ hasVisited, onSelect }) => {
   if (phase === "splash") {
     return (
       <div className={styles.titleOverlay} onClick={enterMenu}>
-        <div className={styles.titleCard}>
+        <div className={styles.gbaTopBar}></div>
+        <div className={styles.titleCard} style={{ zIndex: 2 }}>
           <div>
             <p className={styles.titleText}>{SITE_CONFIG.title}</p>
-            <p className={styles.titleSubtext}>{SITE_CONFIG.subtitle}</p>
+            <p className={styles.titleSubtext}>
+              {SITE_CONFIG.subtitle} VERSION 3.0
+            </p>
           </div>
-          <p className={styles.pressStart}>▶ PRESS START ◀</p>
-          <p className={styles.copyright}>
+          <p className={styles.pressStart}>PRESS START</p>
+          <p className={styles.copyright} style={{ color: '#fff', textShadow: '1px 1px 0 #000' }}>
             © {SITE_CONFIG.copyrightYear} {SITE_CONFIG.title}
           </p>
         </div>
+        <div className={styles.gbaBottomBar}></div>
       </div>
     );
   }
 
   // ── Render: Save-select menu ───────────────────────────────────────────────
+  
+  // Find index of 'continue' if it exists, to render its cursor
+  const continueIndex = availableItems.findIndex(i => i.id === "continue");
+  // Find other items
+  const otherItems = availableItems.filter(i => i.id !== "continue");
+  
   return (
-    <div className={styles.titleOverlay}>
-      <div className={styles.titleCard}>
-        {/* Small title above menu */}
-        <p
-          className={styles.titleSubtext}
-          style={{ marginBottom: 0, letterSpacing: "4px" }}
-        >
-          {SITE_CONFIG.title}
-        </p>
+    <div className={styles.menuOverlay}>
+      <div className={styles.menuLayout}>
+        {/* CONTINUE Panel (White) - Only if hasVisited */}
+        {hasVisited && (
+          <div className={styles.gbaPanelWhite}>
+            <div 
+              className={`${styles.menuItem} ${cursorIndex === continueIndex ? styles.menuItemHover : ''}`}
+              onClick={() => onSelect?.("continue")}
+              onMouseEnter={() => setCursorIndex(continueIndex)}
+            >
+              <span 
+                className={styles.menuCursor} 
+                style={{ visibility: cursorIndex === continueIndex ? 'visible' : 'hidden' }}
+              >
+                ▶
+              </span>
+              <span className={styles.gbaTitleBlue}>CONTINUE</span>
+            </div>
+            
+            <div className={styles.gbaStatsGrid}>
+              <span>PLAYER</span>
+              <span>KUSHAL</span>
+              
+              <span>TIME</span>
+              <span>99:59</span>
+              
+              <span>POKéDEX</span>
+              <span>385</span>
+              
+              <span>BADGES</span>
+              <span>8</span>
+            </div>
+          </div>
+        )}
 
-        <div className={styles.menuBox}>
-          <p className={styles.menuTitle}>— SELECT —</p>
+        {/* OTHER OPTIONS Panel (Gray) */}
+        <div className={styles.gbaPanelGray}>
           <ul className={styles.menuList}>
-            {availableItems.map((item, i) => {
-              const isDisabled = !item.alwaysEnabled && !hasVisited;
+            {otherItems.map((item) => {
+              // Find its global index for cursor tracking
+              const globalIndex = availableItems.findIndex(i => i.id === item.id);
               return (
                 <li
                   key={item.id}
-                  className={
-                    isDisabled ? styles.menuItemDisabled : styles.menuItem
-                  }
-                  onClick={() => !isDisabled && onSelect?.(item.id)}
-                  onMouseEnter={() => !isDisabled && setCursorIndex(i)}
+                  className={`${styles.menuItem} ${cursorIndex === globalIndex ? styles.menuItemHover : ''}`}
+                  onClick={() => onSelect?.(item.id)}
+                  onMouseEnter={() => setCursorIndex(globalIndex)}
                 >
-                  {cursorIndex === i && !isDisabled && (
-                    <span className={styles.menuCursor}>▶</span>
-                  )}
+                  <span 
+                    className={styles.menuCursor} 
+                    style={{ visibility: cursorIndex === globalIndex ? 'visible' : 'hidden' }}
+                  >
+                    ▶
+                  </span>
                   {item.label}
                 </li>
               );
             })}
           </ul>
-          <p className={styles.copyright} style={{ marginTop: 16 }}>
-            © {SITE_CONFIG.copyrightYear} {SITE_CONFIG.title}
-          </p>
         </div>
+        
       </div>
     </div>
   );
