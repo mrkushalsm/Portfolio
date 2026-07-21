@@ -30,7 +30,11 @@ const Win10Desktop = () => {
     const handleShutdown = () => {
         setIsShuttingDown(true);
         setTimeout(() => {
-            router.push("/?from=shutdown");
+            if (window.top !== window.self) {
+                window.parent.postMessage({ type: "RETRO_SHUTDOWN" }, "*");
+            } else {
+                router.push("/?from=shutdown");
+            }
         }, 2500);
     };
     

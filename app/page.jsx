@@ -1,7 +1,7 @@
 "use client";
 
-import LandingPage from "../src/pages/LandingPage";
+import RetroShell from "../src/pages/RetroShell";
 
 export default function Page() {
-    return <LandingPage />;
+    return <RetroShell />;
 }

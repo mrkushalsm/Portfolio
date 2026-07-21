@@ -1,4 +1,12 @@
 import "./globals.css";
+import { Press_Start_2P } from "next/font/google";
+
+const pressStart2P = Press_Start_2P({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-press-start",
+  display: "swap",
+});
 
 import { FileSystemProvider } from '../src/context/FileSystemContext';
 
@@ -13,7 +21,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="no-scrollbar">
+    <html lang="en" className={`no-scrollbar ${pressStart2P.variable}`}>
       <body>
         <FileSystemProvider>
             {children}
