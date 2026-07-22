@@ -244,6 +244,39 @@
   margin-top: 20px;
 }
 
+/* ── Speaker Portraits ───────────────────────────────────────────────────── */
+.speakerPortraitContainer {
+  position: absolute;
+  bottom: calc(100% - 4px); /* sits flush above the dialogue box */
+  width: 180px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.speakerPortraitLeft {
+  left: 28px;
+}
+
+.speakerPortraitRight {
+  right: 28px;
+}
+
+.speakerPortraitVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.speakerPortrait {
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  display: block;
+  /* Subtle drop shadow to ground the portrait */
+  filter: drop-shadow(2px 4px 0 rgba(0, 0, 0, 0.35));
+}
+
 /* ── Dialogue Box ────────────────────────────────────────────────────────── */
 .dialogueOverlay {
   position: fixed;

@@ -37,7 +37,7 @@ if (typeof window !== "undefined" && typeof Element !== "undefined") {
     originalConsoleError.apply(console, args);
   };
 }
-import { useGLTF, useProgress, Html, PointerLockControls } from "@react-three/drei";
+import { useGLTF, useProgress, Html, PointerLockControls, useTexture } from "@react-three/drei";
 import { gsap } from "gsap";
 import * as THREE from "three";
 
@@ -127,7 +127,100 @@ const RoomModel = ({ onMonitorReady }) => {
     hasReported.current = true;
   }, [scene, onMonitorReady]);
 
-  return <primitive object={scene} position={[0, -1, 0]} scale={[1, 1, 1]} />;
+  return <primitive object={scene} position={[0, -1, 0]} scale={[1, 1, 1]} dispose={null} />;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KushalModel — low-poly seated 3D character built from box geometries
+// Colors sampled from the sprite pixel art. Faces the monitor (negative X).
+// ─────────────────────────────────────────────────────────────────────────────
+const KushalModel = () => {
+  const SKIN  = "#c8956c";
+  const HAIR  = "#1a1008";
+  const SUIT  = "#1c1c24";
+  const CHAIN = "#c8a84b";
+  const SHOE  = "#2a1a0a";
+  const PANT  = "#111118";
+
+  // Root sits at the chair: slightly in front of desk, at seat height.
+  // Facing negative X (toward the monitor) via rotation.y = -PI/2.
+  return (
+    <group position={[-4.35, -0.6, -1.3]} rotation={[0, -(Math.PI * 0.99), 0]} scale={[1.8, 1.8, 1.8]}>
+      {/* Hair top */}
+      <mesh position={[0, 0.60, 0]}>
+        <boxGeometry args={[0.19, 0.07, 0.19]} />
+        <meshLambertMaterial color={HAIR} />
+      </mesh>
+      {/* Head */}
+      <mesh position={[0, 0.49, 0]}>
+        <boxGeometry args={[0.17, 0.15, 0.17]} />
+        <meshLambertMaterial color={SKIN} />
+      </mesh>
+      {/* Hair back */}
+      <mesh position={[0, 0.52, -0.07]}>
+        <boxGeometry args={[0.19, 0.13, 0.04]} />
+        <meshLambertMaterial color={HAIR} />
+      </mesh>
+      {/* Torso — made taller */}
+      <mesh position={[0, 0.26, 0]}>
+        <boxGeometry args={[0.19, 0.30, 0.13]} />
+        <meshLambertMaterial color={SUIT} />
+      </mesh>
+      {/* Gold chain */}
+      <mesh position={[0, 0.30, 0.065]}>
+        <boxGeometry args={[0.05, 0.03, 0.01]} />
+        <meshLambertMaterial color={CHAIN} />
+      </mesh>
+      {/* Left arm (angled toward keyboard) */}
+      <mesh position={[-0.12, 0.28, 0.09]} rotation={[-0.5, 0, 0]}>
+        <boxGeometry args={[0.065, 0.22, 0.065]} />
+        <meshLambertMaterial color={SUIT} />
+      </mesh>
+      {/* Right arm */}
+      <mesh position={[0.12, 0.28, 0.09]} rotation={[-0.5, 0, 0]}>
+        <boxGeometry args={[0.065, 0.22, 0.065]} />
+        <meshLambertMaterial color={SUIT} />
+      </mesh>
+      {/* Left hand */}
+      <mesh position={[-0.12, 0.20, 0.17]}>
+        <boxGeometry args={[0.055, 0.055, 0.055]} />
+        <meshLambertMaterial color={SKIN} />
+      </mesh>
+      {/* Right hand */}
+      <mesh position={[0.12, 0.20, 0.17]}>
+        <boxGeometry args={[0.055, 0.055, 0.055]} />
+        <meshLambertMaterial color={SKIN} />
+      </mesh>
+      {/* Upper legs (horizontal — seated) */}
+      <mesh position={[-0.055, 0.04, 0.1]} rotation={[Math.PI / 2, 0, 0]}>
+        <boxGeometry args={[0.09, 0.25, 0.09]} />
+        <meshLambertMaterial color={PANT} />
+      </mesh>
+      <mesh position={[0.055, 0.04, 0.1]} rotation={[Math.PI / 2, 0, 0]}>
+        <boxGeometry args={[0.09, 0.25, 0.09]} />
+        <meshLambertMaterial color={PANT} />
+      </mesh>
+      {/* Lower legs (hanging down) */}
+      <mesh position={[-0.055, -0.10, 0.19]}>
+        <boxGeometry args={[0.08, 0.18, 0.08]} />
+        <meshLambertMaterial color={PANT} />
+      </mesh>
+      <mesh position={[0.055, -0.10, 0.19]}>
+        <boxGeometry args={[0.08, 0.18, 0.08]} />
+        <meshLambertMaterial color={PANT} />
+      </mesh>
+      {/* Shoes */}
+      <mesh position={[-0.055, -0.205, 0.21]}>
+        <boxGeometry args={[0.09, 0.055, 0.11]} />
+        <meshLambertMaterial color={SHOE} />
+      </mesh>
+      <mesh position={[0.055, -0.205, 0.21]}>
+        <boxGeometry args={[0.09, 0.055, 0.11]} />
+        <meshLambertMaterial color={SHOE} />
+      </mesh>
+    </group>
+
+  );
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -371,6 +464,7 @@ const RoomScene = ({ gameState, onMonitorReady, onCutsceneComplete, onInteractCo
       <pointLight position={[-3, 2, -2]} intensity={1.2} color="#ffeedd" />
       <Suspense fallback={<SceneLoader />}>
         <RoomModel onMonitorReady={handleMonitorReady} />
+        <KushalModel />
         <CameraController
           gameState={gameState}
           monitorPosition={monitorPosition}
