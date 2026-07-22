@@ -95,74 +95,56 @@ const TitleScreen = ({ hasVisited, onSelect }) => {
   }
 
   // ── Render: Save-select menu ───────────────────────────────────────────────
-  
-  // Find index of 'continue' if it exists, to render its cursor
-  const continueIndex = availableItems.findIndex(i => i.id === "continue");
-  // Find other items
-  const otherItems = availableItems.filter(i => i.id !== "continue");
-  
   return (
     <div className={styles.menuOverlay}>
       <div className={styles.menuLayout}>
-        {/* CONTINUE Panel (White) - Only if hasVisited */}
-        {hasVisited && (
-          <div className={styles.gbaPanelWhite}>
-            <div 
-              className={`${styles.menuItem} ${cursorIndex === continueIndex ? styles.menuItemHover : ''}`}
-              onClick={() => onSelect?.("continue")}
-              onMouseEnter={() => setCursorIndex(continueIndex)}
-            >
-              <span 
-                className={styles.menuCursor} 
-                style={{ visibility: cursorIndex === continueIndex ? 'visible' : 'hidden' }}
-              >
-                ▶
-              </span>
-              <span className={styles.gbaTitleBlue}>CONTINUE</span>
-            </div>
-            
-            <div className={styles.gbaStatsGrid}>
-              <span>PLAYER</span>
-              <span>KUSHAL</span>
-              
-              <span>TIME</span>
-              <span>99:59</span>
-              
-              <span>POKéDEX</span>
-              <span>385</span>
-              
-              <span>BADGES</span>
-              <span>8</span>
-            </div>
-          </div>
-        )}
+        {availableItems.map((item, index) => {
+          const isSelected = cursorIndex === index;
+          const isContinue = item.id === "continue";
 
-        {/* OTHER OPTIONS Panel (Gray) */}
-        <div className={styles.gbaPanelGray}>
-          <ul className={styles.menuList}>
-            {otherItems.map((item) => {
-              // Find its global index for cursor tracking
-              const globalIndex = availableItems.findIndex(i => i.id === item.id);
-              return (
-                <li
-                  key={item.id}
-                  className={`${styles.menuItem} ${cursorIndex === globalIndex ? styles.menuItemHover : ''}`}
-                  onClick={() => onSelect?.(item.id)}
-                  onMouseEnter={() => setCursorIndex(globalIndex)}
+          return (
+            <div
+              key={item.id}
+              className={`${styles.gbaPanelCard} ${
+                isSelected ? styles.gbaPanelActive : styles.gbaPanelInactive
+              }`}
+              onClick={() => onSelect?.(item.id)}
+              onMouseEnter={() => setCursorIndex(index)}
+            >
+              <div className={styles.menuItem}>
+                <span
+                  className={styles.menuCursor}
+                  style={{ visibility: isSelected ? "visible" : "hidden" }}
                 >
-                  <span 
-                    className={styles.menuCursor} 
-                    style={{ visibility: cursorIndex === globalIndex ? 'visible' : 'hidden' }}
-                  >
-                    ▶
-                  </span>
+                  ▶
+                </span>
+                <span className={isSelected ? styles.gbaTitleBlue : styles.gbaTitleGray}>
                   {item.label}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-        
+                </span>
+              </div>
+
+              {isContinue && (
+                <div
+                  className={`${styles.gbaStatsGrid} ${
+                    isSelected ? styles.statsBlue : styles.statsGray
+                  }`}
+                >
+                  <span>PLAYER</span>
+                  <span>KUSHAL</span>
+
+                  <span>TIME</span>
+                  <span>99:59</span>
+
+                  <span>POKéDEX</span>
+                  <span>385</span>
+
+                  <span>BADGES</span>
+                  <span>8</span>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

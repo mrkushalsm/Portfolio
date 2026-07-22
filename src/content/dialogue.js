@@ -22,36 +22,98 @@ export const INTRO_DIALOGUE = [
     text: "Hello there!\nWelcome to my world!",
   },
   {
-    speaker: "kushal",
-    text: "...\nWhy are you disturbing me?",
+    speaker: "elite2",
+    text: "My name is [REDACTED]!\n And people call me-",
   },
   {
     speaker: "elite2",
-    text: "My name is [REDACTED]!\nPeople call me the Portfolio Prof!",
-  },
-  {
-    speaker: "kushal",
-    text: "I was literally in the middle\nof something important.",
+    text: "One of the Elite 4!",
   },
   {
     speaker: "elite2",
-    text: "This world is inhabited by creators\ncalled DEVELOPERS!",
-  },
-  {
-    speaker: "kushal",
-    text: "Yes, I know. I AM one.\nCan we please get to the point?",
+    text: "This world is inhabited by...\n Well no one other than me and this weird guy over here!",
+    triggerAction: "WALK_TO_DESK",
   },
   {
     speaker: "elite2",
-    text: "For some, PROJECTS are companions.\nFor others, puzzles to be solved.",
+    text: "He builds apps... \nHe builds websites.",
   },
   {
     speaker: "elite2",
-    text: "Your very own PORTFOLIO legend\nis about to unfold!",
+    text: "But most of the time he's\nbusy fixing his PC.",
+  },
+  {
+    speaker: "elite2",
+    text: "Let's meet our \"developer\"...\nthis is Kushal!",
   },
   {
     speaker: "kushal",
-    text: "Fine. Fine.\nLet's just get this over with.",
+    text: "...\nWhy are you disturbing me?\nI'm in the middle of something.",
+  },
+  {
+    speaker: "elite2",
+    text: "I can see that.\nStaring at the same screen for 4 hours.",
+  },
+  {
+    speaker: "kushal",
+    text: "Four?\nIt's just been 5 minutes since it's boot.",
+  },
+  {
+    speaker: "elite2",
+    text: "Well then, I interrupted you\nat the perfect time.",
+  },
+  {
+    speaker: "kushal",
+    text: "There is no perfect time.",
+  },
+  {
+    speaker: "elite2",
+    text: "You were fixing a bug,\nweren't you?",
+  },
+  {
+    speaker: "kushal",
+    text: "I was.\nPC crashed, so rebooting it.",
+  },
+  {
+    speaker: "elite2",
+    text: "That's usually how these stories go.",
+  },
+  {
+    speaker: "elite2",
+    text: "For some, PROJECTS are companions.\nFor others, puzzles to be solved-",
+  },
+  {
+    speaker: "kushal",
+    text: "You're really bad at this aren't you?",
+  },
+  {
+    speaker: "elite2",
+    text: "At least I didn't crash my PC.",
+  },
+  {
+    speaker: "kushal",
+    text: "You've lost the plot\nabout three dialogues ago.",
+  },
+  {
+    speaker: "elite2",
+    text: "Hey-",
+  },
+  {
+    speaker: "kushal",
+    text: "At least can I introduce\nmyself properly?",
+  },
+  {
+    speaker: "elite2",
+    text: "No that's my jo-",
+  },
+  {
+    speaker: "kushal",
+    text: "Anyways\nI'll take over from here.",
+  },
+  {
+    speaker: "kushal",
+    text: "Would you like to check out\nmy portfolio?",
+    pose: "POINTING",
   },
 ];
 
@@ -61,10 +123,4 @@ export const CONTINUE_DIALOGUE = [
     speaker: "kushal",
     text: "1 item was deposited...\njust kidding, welcome back!",
   },
-];
-
-// ── Mystery Gift path ──────────────────────────────────────────────────────
-export const MYSTERY_GIFT_DIALOGUE = [
-  "You received a Mystery Gift!",
-  "Check back later for more updates.",
 ];

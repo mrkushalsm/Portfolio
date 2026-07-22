@@ -16,7 +16,7 @@ import { SPEAKER_SPRITES } from "../../content/dialogue";
 
 const CHAR_DELAY_MS = 28; // Milliseconds per character
 
-const DialogueBox = ({ lines = [], onComplete, onSkip }) => {
+const DialogueBox = ({ lines = [], onComplete, onSkip, onLineChange }) => {
   const [lineIndex, setLineIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [displayed, setDisplayed] = useState("");
@@ -66,6 +66,7 @@ const DialogueBox = ({ lines = [], onComplete, onSkip }) => {
     setDisplayed("");
     setCharIndex(0);
     setIsDone(false);
+    onLineChange?.(lineIndex, currentLine);
   }, [lineIndex]);
 
   // ── Advance handler ────────────────────────────────────────────────────────

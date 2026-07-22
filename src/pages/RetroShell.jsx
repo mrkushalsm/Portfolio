@@ -19,14 +19,13 @@
 import React, { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { SITE_CONFIG } from "../config";
-import { INTRO_DIALOGUE, CONTINUE_DIALOGUE, MYSTERY_GIFT_DIALOGUE } from "../content/dialogue";
+import { INTRO_DIALOGUE, CONTINUE_DIALOGUE } from "../content/dialogue";
 import TitleScreen from "../components/retro/TitleScreen";
 import DialogueBox from "../components/retro/DialogueBox";
 import styles from "../components/retro/retro.module.css";
 
-// Dynamic imports — Canvas/Three.js must not run server-side
+import ComputerOverlay from "../components/retro/ComputerOverlay";
 const RoomScene = dynamic(() => import("../components/retro/RoomScene"), { ssr: false });
-const ComputerOverlay = dynamic(() => import("../components/retro/ComputerOverlay"), { ssr: false });
 
 const VISITED_KEY = "retro_shell_visited";
 
@@ -62,29 +61,6 @@ const OptionsModal = ({ currentThemeId, onThemeChange, onClose }) => (
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Mystery Gift modal
-// ─────────────────────────────────────────────────────────────────────────────
-const MysteryGiftModal = ({ onClose }) => (
-  <div className={styles.modal}>
-    <div className={styles.modalBox}>
-      <p className={styles.modalTitle}>✉ MYSTERY GIFT</p>
-      <p className={styles.modalText}>{MYSTERY_GIFT_DIALOGUE.join("\n\n")}</p>
-      <a
-        className={styles.modalButton}
-        href="/C/Users/Kushal/Documents/Resume.pdf"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        ▶ VIEW RÉSUMÉ
-      </a>
-      <button className={styles.modalButton} style={{ marginTop: 8 }} onClick={onClose}>
-        ▶ CLOSE
-      </button>
-    </div>
-  </div>
-);
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Crosshair — shown in FPS exploring mode
 // ─────────────────────────────────────────────────────────────────────────────
 const Crosshair = () => (
@@ -104,6 +80,138 @@ const Crosshair = () => (
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Path Recorder UI (On-Screen Controller & JSON Exporter)
+// ─────────────────────────────────────────────────────────────────────────────
+const PathRecorderUI = () => {
+  const [recording, setRecording] = useState(false);
+  const [keyframes, setKeyframes] = useState([]);
+  const [showResult, setShowResult] = useState(false);
+
+  useEffect(() => {
+    let interval = null;
+    if (recording) {
+      interval = setInterval(() => {
+        if (typeof window !== "undefined" && window.__RECORD_CAM__) {
+          const frame = window.__RECORD_CAM__();
+          if (frame) {
+            setKeyframes((prev) => [...prev, frame]);
+          }
+        }
+      }, 150);
+    }
+    return () => clearInterval(interval);
+  }, [recording]);
+
+  const handleStart = () => {
+    setKeyframes([]);
+    setShowResult(false);
+    setRecording(true);
+  };
+
+  const handleStop = () => {
+    setRecording(false);
+    setShowResult(true);
+  };
+
+  return (
+    <div style={{ position: "fixed", top: 16, left: 16, zIndex: 99999, pointerEvents: "auto" }}>
+      {!recording ? (
+        <button
+          onClick={handleStart}
+          style={{
+            background: "#e53e3e",
+            color: "#fff",
+            padding: "10px 16px",
+            fontSize: "12px",
+            fontWeight: "bold",
+            borderRadius: "6px",
+            border: "2px solid #fff",
+            cursor: "pointer",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.6)",
+            fontFamily: "monospace",
+          }}
+        >
+          🔴 START RECORDING PATH
+        </button>
+      ) : (
+        <button
+          onClick={handleStop}
+          style={{
+            background: "#dd6b20",
+            color: "#fff",
+            padding: "10px 16px",
+            fontSize: "12px",
+            fontWeight: "bold",
+            borderRadius: "6px",
+            border: "2px solid #fff",
+            cursor: "pointer",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.6)",
+            fontFamily: "monospace",
+          }}
+        >
+          ⏹️ STOP RECORDING ({keyframes.length} frames)
+        </button>
+      )}
+
+      {showResult && (
+        <div
+          style={{
+            marginTop: 10,
+            background: "#1a202c",
+            color: "#4ade80",
+            padding: 14,
+            borderRadius: 8,
+            width: 340,
+            boxShadow: "0 10px 25px rgba(0,0,0,0.8)",
+            border: "1px solid #4a5568",
+          }}
+        >
+          <div style={{ fontWeight: "bold", marginBottom: 6, color: "#fff", fontSize: "12px", fontFamily: "monospace" }}>
+            📋 RECORDED PATH ({keyframes.length} frames):
+          </div>
+          <textarea
+            readOnly
+            rows={8}
+            style={{
+              width: "100%",
+              background: "#0d1117",
+              color: "#4ade80",
+              fontFamily: "monospace",
+              fontSize: "10px",
+              padding: 6,
+              borderRadius: 4,
+              border: "1px solid #30363d",
+              resize: "vertical",
+            }}
+            value={JSON.stringify(keyframes, null, 2)}
+          />
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(JSON.stringify(keyframes, null, 2));
+              alert("Copied path JSON to clipboard!");
+            }}
+            style={{
+              marginTop: 6,
+              width: "100%",
+              background: "#3182ce",
+              color: "#fff",
+              padding: "8px",
+              borderRadius: "4px",
+              border: "none",
+              cursor: "pointer",
+              fontWeight: "bold",
+              fontSize: "12px",
+            }}
+          >
+            📋 COPY JSON TO CLIPBOARD
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Main component
 // ─────────────────────────────────────────────────────────────────────────────
 const RetroShell = () => {
@@ -112,6 +220,8 @@ const RetroShell = () => {
     typeof window !== "undefined" && window.location.search.includes("from=shutdown");
 
   const [gameState, setGameState]   = useState(isFromShutdown ? "exploring" : "title");
+  const [introPhase, setIntroPhase] = useState("START"); // 'START' | 'WALKING' | 'AT_DESK'
+  const [kushalPose, setKushalPose] = useState("IDLE"); // 'IDLE' | 'TALKING' | 'POINTING'
   const [isContinuePath, setIsContinuePath] = useState(false);
   const [hasVisited, setHasVisited] = useState(false);
   const [showModal, setShowModal]   = useState(null); // 'options' | 'mystery_gift' | null
@@ -144,6 +254,8 @@ const RetroShell = () => {
   const handleMenuSelect = useCallback((choice) => {
     if (choice === "new_game") {
       setIsContinuePath(false);
+      setIntroPhase("START");
+      setKushalPose("IDLE");
       setGameState("dialogue");
     } else if (choice === "continue") {
       setIsContinuePath(true);
@@ -156,8 +268,22 @@ const RetroShell = () => {
     }
   }, []);
 
+  // ── Track dialogue line advancement ──────────────────────────────────────
+  const handleLineChange = useCallback((lineIdx, currentLine) => {
+    if (currentLine?.triggerAction === "WALK_TO_DESK") {
+      setIntroPhase("WALKING");
+    }
+
+    if (currentLine?.pose) {
+      setKushalPose(currentLine.pose);
+    } else if (currentLine?.speaker === "kushal") {
+      setKushalPose("TALKING");
+    }
+  }, []);
+
   // ── Dialogue complete → cutscene ─────────────────────────────────────────
   const handleDialogueComplete = useCallback(() => {
+    setKushalPose("IDLE"); // Return back to monitor position naturally!
     setGameState("cutscene");
   }, []);
 
@@ -175,6 +301,8 @@ const RetroShell = () => {
       <div className={styles.canvasWrapper}>
         <RoomScene
           gameState={gameState}
+          introPhase={introPhase}
+          kushalPose={kushalPose}
           onCutsceneComplete={handleCutsceneComplete}
           onInteractComputer={() => setGameState("cutscene")}
         />
@@ -189,6 +317,7 @@ const RetroShell = () => {
       {gameState === "dialogue" && (
         <DialogueBox
           lines={INTRO_DIALOGUE}
+          onLineChange={handleLineChange}
           onComplete={handleDialogueComplete}
           onSkip={handleDialogueComplete}
         />
