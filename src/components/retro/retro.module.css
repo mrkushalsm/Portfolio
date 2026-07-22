@@ -248,6 +248,59 @@
   margin-top: 20px;
 }
 
+/* ── Pokémon Exclamation Bubble ──────────────────────────────────────────── */
+.exclamationBubble {
+  background: #ffffff;
+  border: 3px solid #101010;
+  border-radius: 6px;
+  width: 28px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+  animation: popInBounce 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  image-rendering: pixelated;
+  user-select: none;
+}
+
+.exclamationBubble::after {
+  content: "";
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid #101010;
+}
+
+.exclamationMark {
+  font-family: var(--font-press-start), monospace;
+  color: #e53e3e;
+  font-size: 18px;
+  font-weight: bold;
+  text-shadow: 1px 1px 0px #000;
+}
+
+@keyframes popInBounce {
+  0% {
+    transform: scale(0) translateY(12px);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.25) translateY(-4px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
 /* ── Speaker Portraits ───────────────────────────────────────────────────── */
 .speakerPortraitContainer {
   position: absolute;

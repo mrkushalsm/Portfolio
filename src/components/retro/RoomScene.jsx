@@ -40,6 +40,7 @@ if (typeof window !== "undefined" && typeof Element !== "undefined") {
 import { useGLTF, useProgress, Html, PointerLockControls, useTexture } from "@react-three/drei";
 import { gsap } from "gsap";
 import * as THREE from "three";
+import styles from "./retro.module.css";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CAMERA POSITIONS — tweak these to adjust framing
@@ -134,7 +135,7 @@ const RoomModel = ({ onMonitorReady }) => {
 // KushalModel — low-poly seated 3D character built from box geometries
 // Colors sampled from the sprite pixel art. Faces the monitor (negative X).
 // ─────────────────────────────────────────────────────────────────────────────
-const KushalModel = ({ pose = "IDLE" }) => {
+const KushalModel = ({ pose = "IDLE", showExclamation = false }) => {
   const SKIN  = "#c8956c";
   const HAIR  = "#1a1008";
   const SUIT  = "#1c1c24";
@@ -179,6 +180,15 @@ const KushalModel = ({ pose = "IDLE" }) => {
 
   return (
     <group ref={groupRef} position={[-4.35, -0.6, -1.3]} rotation={[0, Math.PI * 1.01, 0]} scale={[1.8, 1.8, 1.8]}>
+      {/* Pokémon Exclamation Bubble ("!") */}
+      {showExclamation && (
+        <Html position={[0, 0.78, 0]} center distanceFactor={7} zIndexRange={[100, 0]}>
+          <div className={styles.exclamationBubble}>
+            <span className={styles.exclamationMark}>!</span>
+          </div>
+        </Html>
+      )}
+
       {/* Hair top */}
       <mesh position={[0, 0.60, 0]}>
         <boxGeometry args={[0.19, 0.07, 0.19]} />
@@ -465,26 +475,54 @@ const CameraController = ({ gameState, introPhase, monitorPosition, onCutsceneCo
         { x: -3.181, y: 0.32, z: -1.361, rotY: 1.498 },
       ];
 
-      // Reset to start keyframe
-      camera.position.set(RECORDED_KEYFRAMES[0].x, RECORDED_KEYFRAMES[0].y, RECORDED_KEYFRAMES[0].z);
-      camera.rotation.set(0, RECORDED_KEYFRAMES[0].rotY, 0);
+      // Calculate cumulative distances along keyframes for uniform, natural speed
+      const waypoints = RECORDED_KEYFRAMES;
+      const distances = [0];
+      let totalLength = 0;
 
+      for (let i = 1; i < waypoints.length; i++) {
+        const p1 = new THREE.Vector3(waypoints[i - 1].x, waypoints[i - 1].y, waypoints[i - 1].z);
+        const p2 = new THREE.Vector3(waypoints[i].x, waypoints[i].y, waypoints[i].z);
+        totalLength += p1.distanceTo(p2);
+        distances.push(totalLength);
+      }
+
+      // Reset camera
+      camera.position.set(waypoints[0].x, waypoints[0].y, waypoints[0].z);
+      camera.rotation.set(0, waypoints[0].rotY, 0);
+
+      const proxy = { progress: 0 };
       const tl = gsap.timeline();
 
-      RECORDED_KEYFRAMES.forEach((kf, idx) => {
-        if (idx === 0) return;
-        tl.to(camera.position, {
-          x: kf.x,
-          y: kf.y,
-          z: kf.z,
-          duration: 0.42,
-          ease: "power1.inOut",
-        });
-        tl.to(camera.rotation, {
-          y: kf.rotY,
-          duration: 0.42,
-          ease: "power1.inOut",
-        }, "<");
+      tl.to(proxy, {
+        progress: 1,
+        duration: 3.5,
+        ease: "power1.inOut",
+        onUpdate: () => {
+          const currentDist = proxy.progress * totalLength;
+
+          // Find current segment
+          let idx = 0;
+          while (idx < distances.length - 2 && distances[idx + 1] < currentDist) {
+            idx++;
+          }
+
+          const segStartDist = distances[idx];
+          const segEndDist   = distances[idx + 1];
+          const segLength    = segEndDist - segStartDist;
+          const segT         = segLength > 0 ? (currentDist - segStartDist) / segLength : 0;
+
+          const pStart = waypoints[idx];
+          const pEnd   = waypoints[idx + 1];
+
+          // Linear position interpolation along exact segment path (no overshooting curves!)
+          camera.position.x = THREE.MathUtils.lerp(pStart.x, pEnd.x, segT);
+          camera.position.y = THREE.MathUtils.lerp(pStart.y, pEnd.y, segT);
+          camera.position.z = THREE.MathUtils.lerp(pStart.z, pEnd.z, segT);
+
+          // Linear rotation interpolation
+          camera.rotation.y = THREE.MathUtils.lerp(pStart.rotY, pEnd.rotY, segT);
+        },
       });
 
       timelineRef.current = tl;
@@ -568,7 +606,7 @@ const CameraController = ({ gameState, introPhase, monitorPosition, onCutsceneCo
 // ─────────────────────────────────────────────────────────────────────────────
 // Main export
 // ─────────────────────────────────────────────────────────────────────────────
-const RoomScene = ({ gameState, introPhase, kushalPose, onMonitorReady, onCutsceneComplete, onInteractComputer }) => {
+const RoomScene = ({ gameState, introPhase, kushalPose, showExclamation, onMonitorReady, onCutsceneComplete, onInteractComputer }) => {
   const [monitorPosition, setMonitorPosition] = useState(null);
   const controlsRef = useRef(null);
 
@@ -591,7 +629,7 @@ const RoomScene = ({ gameState, introPhase, kushalPose, onMonitorReady, onCutsce
       <pointLight position={[-3, 2, -2]} intensity={1.2} color="#ffeedd" />
       <Suspense fallback={<SceneLoader />}>
         <RoomModel onMonitorReady={handleMonitorReady} />
-        <KushalModel pose={kushalPose} />
+        <KushalModel pose={kushalPose} showExclamation={showExclamation} />
         <CameraController
           gameState={gameState}
           introPhase={introPhase}

@@ -222,6 +222,7 @@ const RetroShell = () => {
   const [gameState, setGameState]   = useState(isFromShutdown ? "exploring" : "title");
   const [introPhase, setIntroPhase] = useState("START"); // 'START' | 'WALKING' | 'AT_DESK'
   const [kushalPose, setKushalPose] = useState("IDLE"); // 'IDLE' | 'TALKING' | 'POINTING'
+  const [showExclamation, setShowExclamation] = useState(false);
   const [isContinuePath, setIsContinuePath] = useState(false);
   const [hasVisited, setHasVisited] = useState(false);
   const [showModal, setShowModal]   = useState(null); // 'options' | 'mystery_gift' | null
@@ -256,6 +257,7 @@ const RetroShell = () => {
       setIsContinuePath(false);
       setIntroPhase("START");
       setKushalPose("IDLE");
+      setShowExclamation(false);
       setGameState("dialogue");
     } else if (choice === "continue") {
       setIsContinuePath(true);
@@ -274,6 +276,27 @@ const RetroShell = () => {
       setIntroPhase("WALKING");
     }
 
+    if (currentLine?.showExclamation) {
+      setShowExclamation(true);
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.12);
+      } catch {}
+    } else {
+      setShowExclamation(false);
+    }
+
     if (currentLine?.pose) {
       setKushalPose(currentLine.pose);
     } else if (currentLine?.speaker === "kushal") {
@@ -284,6 +307,7 @@ const RetroShell = () => {
   // ── Dialogue complete → cutscene ─────────────────────────────────────────
   const handleDialogueComplete = useCallback(() => {
     setKushalPose("IDLE"); // Return back to monitor position naturally!
+    setShowExclamation(false);
     setGameState("cutscene");
   }, []);
 
@@ -303,6 +327,7 @@ const RetroShell = () => {
           gameState={gameState}
           introPhase={introPhase}
           kushalPose={kushalPose}
+          showExclamation={showExclamation}
           onCutsceneComplete={handleCutsceneComplete}
           onInteractComputer={() => setGameState("cutscene")}
         />

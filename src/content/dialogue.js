@@ -45,6 +45,7 @@ export const INTRO_DIALOGUE = [
   {
     speaker: "elite2",
     text: "Let's meet our \"developer\"...\nthis is Kushal!",
+    showExclamation: true,
   },
   {
     speaker: "kushal",
